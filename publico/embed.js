@@ -1,7 +1,7 @@
 /*
  * Asistente IA — se integra en cualquier página con una sola línea, antes de </body>:
  *
- *   <script src="https://asistente-ia.pages.dev/embed.js" defer></script>
+ *   <script src="https://asistente-ia.andres-veran.workers.dev/embed.js" defer></script>
  *
  * Todo lo del sitio (nombre, saludo, colores, modo contacto o ticket, datos obligatorios y lo
  * que sabe el asistente) se configura en el servidor, en sitios/<dominio>.md. Un sitio sin

@@ -20,7 +20,7 @@ envget() { grep -E "^$1=" .env | tail -1 | cut -d= -f2-; }
 PORT=$(envget PORT); PORT=${PORT:-5204}
 ADMIN_PORT=$(envget ADMIN_PORT); ADMIN_PORT=${ADMIN_PORT:-5205}
 OMLX_URL=$(envget OMLX_URL); OMLX_URL=${OMLX_URL:-http://127.0.0.1:8000}
-SITIO_URL=$(envget SITIO_URL); SITIO_URL=${SITIO_URL:-https://asistente-ia.pages.dev}
+SITIO_URL=$(envget SITIO_URL); SITIO_URL=${SITIO_URL:-https://asistente-ia.andres-veran.workers.dev}
 
 command -v cloudflared >/dev/null || fail "Falta cloudflared. Instálalo con:  brew install cloudflared"
 curl -sf -m 5 "$OMLX_URL/health" >/dev/null || fail "oMLX no responde en $OMLX_URL. Arráncalo primero."
