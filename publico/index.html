@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asistente IA · integración</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+  <style>
+    :root { --bg: #f7f8fb; --text: #141824; --muted: #5d6475; --card: #fff; --border: #e3e6ee; --accent: #2f5bff; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #10131a; --text: #eef0f6; --muted: #a1a8b8; --card: #171b25; --border: #283041; --accent: #6f8cff; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { width: min(760px, 100% - 32px); margin: 56px auto; }
+    h1 { font-size: clamp(28px, 5vw, 40px); margin: 0 0 8px; }
+    p.lead { color: var(--muted); margin: 0 0 32px; }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; margin-bottom: 16px; }
+    h2 { font-size: 18px; margin: 0 0 8px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; }
+    pre { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; overflow-x: auto; margin: 10px 0 0; }
+    .muted { color: var(--muted); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>💬 Asistente IA</h1>
+    <p class="lead">Asistente de inteligencia artificial que corre en infraestructura propia y se integra en cualquier sitio web con una sola línea.</p>
+    <section>
+      <h2>1. Pega esta línea antes de <code>&lt;/body&gt;</code></h2>
+      <pre>&lt;script src="https://asistente-ia.pages.dev/embed.js" defer&gt;&lt;/script&gt;</pre>
+      <p class="muted">WordPress: plugin WPCode → footer · Shopify: <code>theme.liquid</code> · Wix / Squarespace: código personalizado del pie de página.</p>
+    </section>
+    <section>
+      <h2>2. Pide que activen tu sitio</h2>
+      <p>El asistente solo aparece en los sitios autorizados. Cada sitio tiene su propia configuración: nombre, saludo, colores, lo que sabe responder y si registra solicitudes de contacto o tickets de mesa de ayuda.</p>
+    </section>
+    <section>
+      <h2>Opcional</h2>
+      <p class="muted">Abrir el asistente desde un botón propio:</p>
+      <pre>&lt;button onclick="asistenteIA.open()"&gt;Hablar con el asistente&lt;/button&gt;</pre>
+    </section>
+  </main>
+</body>
+</html>

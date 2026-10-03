@@ -1,0 +1,7 @@
+.DS_Store
+.env
+__pycache__/
+servidor/datos/
+servidor/sitios/*.md
+!servidor/sitios/_plantilla-contacto.md
+!servidor/sitios/_plantilla-ticket.md
