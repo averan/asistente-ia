@@ -5,7 +5,7 @@ línea y responde con el modelo que corre en este Mac (oMLX). Cada sitio tiene s
 personalidad, colores y modo de trabajo, configurados en el servidor.
 
 ```
-Cualquier sitio ──<script src="https://asistente-ia.andres-veran.workers.dev/embed.js">──► Cloudflare Pages (widget)
+Cualquier sitio ──<script src="https://asistente-ia.andres-veran.workers.dev/embed.js">──► Cloudflare Workers (widget)
       └── chat / solicitudes (CORS) ──► túnel ──► servidor del Mac (:5204) ──► oMLX
                                                    ├─ sitios/<dominio>.md  (configuración + contexto de cada sitio)
                                                    └─ datos/asistente.db   (solicitudes de todos los sitios)
@@ -13,7 +13,7 @@ Gestión (solo este Mac): http://localhost:5205
 ```
 
 ```
-publico/     Lo que publica Cloudflare Pages (output directory = publico)
+publico/     Lo que publica Cloudflare (Worker con despliegue desde Git; directorio publico)
   embed.js       la línea que se pega en cada sitio
   asistente.js   widget de chat (adjuntos, solicitudes, modo «no disponible»)
   asistente.css  estilos; los colores de cada sitio llegan desde el servidor

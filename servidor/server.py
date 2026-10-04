@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Servidor del asistente IA (corre en el Mac; el widget está en Cloudflare Pages).
+Servidor del asistente IA (corre en el Mac; el widget está en Cloudflare Workers).
 
 Cualquier sitio integra el asistente con una línea (embed.js). El widget llama a este
 servidor a través del túnel de Cloudflare (ver publicar.sh). Este servidor:

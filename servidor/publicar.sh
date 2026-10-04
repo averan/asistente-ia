@@ -2,7 +2,7 @@
 # Conecta el asistente IA (todos los sitios que lo integran) con el modelo de este Mac.
 #   1. Arranca server.py y abre un túnel gratuito de Cloudflare.
 #   2. Sube a GitHub publico/backend.js con la nueva dirección del túnel y la configuración
-#      visible de cada sitio → Cloudflare Pages se actualiza solo.
+#      visible de cada sitio → Cloudflare se actualiza solo.
 #   3. Al salir (Ctrl+C) deja la dirección vacía: los sitios muestran «asistente no disponible».
 # El Mac debe estar encendido y oMLX en marcha (con el modelo cargado).
 # Uso:  ./servidor/publicar.sh
@@ -75,7 +75,7 @@ echo "Subiendo la nueva dirección a GitHub…"
 publish_backend "$URL" "Asistente: nueva dirección del túnel" || fail "No se pudo subir backend.js a GitHub (revisa tu conexión o ejecuta git push a mano)."
 PUBLISHED=1
 
-echo "Esperando a que Cloudflare Pages publique el cambio…"
+echo "Esperando a que Cloudflare publique el cambio…"
 LIVE=""
 for _ in $(seq 1 60); do
   curl -sf -m 5 "$SITIO_URL/backend.js?t=$(date +%s)" | grep -qF "$URL" && { LIVE=1; break; }
@@ -86,7 +86,7 @@ echo
 if [ -n "$LIVE" ]; then
   echo "${bold}${green}✓ Asistente activo en todos los sitios${reset}  (widget en ${bold}$SITIO_URL${reset})"
 else
-  warn "Cloudflare Pages aún no muestra la nueva dirección. Revisa el despliegue en dash.cloudflare.com; el asistente se activará cuando termine."
+  warn "Cloudflare aún no muestra la nueva dirección. Revisa el despliegue en dash.cloudflare.com; el asistente se activará cuando termine."
 fi
 echo "  Servidor local:  http://localhost:$PORT"
 [ "$ADMIN_PORT" != "0" ] && echo "  Gestión:         http://localhost:$ADMIN_PORT  (solo desde este Mac, no se publica)"
