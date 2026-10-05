@@ -5,7 +5,7 @@ línea y responde con el modelo que corre en este Mac (oMLX). Cada sitio tiene s
 personalidad, colores y modo de trabajo, configurados en el servidor.
 
 ```
-Cualquier sitio ──<script src="https://asistente-ia.andres-veran.workers.dev/embed.js">──► Cloudflare Workers (widget)
+Cualquier sitio ──<script src="https://asistente-ia.faenabot.stream/embed.js">──► Cloudflare Workers (widget)
       └── chat / solicitudes (CORS) ──► túnel ──► servidor del Mac (:5204) ──► oMLX
                                                    ├─ sitios/<dominio>.md  (configuración + contexto de cada sitio)
                                                    └─ datos/asistente.db   (solicitudes de todos los sitios)
@@ -46,7 +46,7 @@ servidor/    Corre en el Mac; nunca se publica
    datos obligatorios. Abajo, lo que sabe el asistente de esa empresa. Los cambios se aplican en la siguiente consulta.
 2. **Pega una línea** antes de `</body>` en el sitio:
    ```html
-   <script src="https://asistente-ia.andres-veran.workers.dev/embed.js" defer></script>
+   <script src="https://asistente-ia.faenabot.stream/embed.js" defer></script>
    ```
    (WordPress: plugin WPCode → footer; Shopify: `theme.liquid`; Wix/Squarespace: código personalizado del pie.)
 
