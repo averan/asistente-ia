@@ -22,7 +22,8 @@ servidor/    Corre en el Mac; nunca se publica
   server.py        servidor del asistente (CORS, prompt en el servidor, límites, archivos)
   solicitudes.py   base de datos (tickets y contactos, archivos con SHA-256, notas)
   gestion.py/.html página de gestión local con visor de archivos
-  publicar.sh      conecta el asistente: servidor + túnel + backend.js
+  publicar.sh      conecta el asistente: servidor + túnel + backend.js (vigila el túnel)
+  servicio.sh      lo deja como servicio del Mac (launchd): arranque automático y reinicio
   importar.py      importa los datos de los proyectos anteriores (se usó una vez)
   reglas/          reglas comunes por modo (contacto.md, ticket.md)
   sitios/          un archivo por sitio (no se suben a GitHub, salvo las plantillas)
@@ -56,13 +57,22 @@ visibles solo en esa página, y `<button onclick="asistenteIA.open()">` abre el 
 
 ## Conectar el asistente
 
+Como **servicio del Mac** (recomendado): arranca solo al iniciar sesión, sigue funcionando aunque se cierre la
+terminal o la app, y se reinicia solo si falla o si el túnel de Cloudflare expira (lo revisa cada minuto).
+
 ```bash
-./servidor/publicar.sh
+./servidor/servicio.sh instalar      # una sola vez
+./servidor/servicio.sh estado        # ¿está corriendo? ¿qué túnel usa?
+./servidor/servicio.sh log           # consultas recibidas y avisos (Ctrl+C para salir del registro)
+./servidor/servicio.sh reiniciar     # túnel nuevo
+./servidor/servicio.sh desinstalar   # lo detiene: los sitios muestran «no disponible»
 ```
 
-Arranca el servidor y el túnel, y sube `publico/backend.js` con la nueva dirección → Cloudflare se actualiza
-solo (~1 min). Con **Ctrl+C** se desconecta y todos los sitios muestran su aviso de «no disponible» (con su nombre y
-colores, que `backend.js` guarda aunque el Mac esté apagado). Requisitos: oMLX en marcha con el modelo cargado.
+O a mano, en una terminal: `./servidor/publicar.sh` (Ctrl+C para desconectarlo).
+
+En ambos casos arranca el servidor y el túnel, y sube `publico/backend.js` con la nueva dirección → Cloudflare se
+actualiza solo (~1 min). Al detenerse, todos los sitios muestran su aviso de «no disponible» (con su nombre y colores,
+que `backend.js` guarda aunque el Mac esté apagado). Requisitos: oMLX en marcha con el modelo cargado.
 
 **Gestión:** http://localhost:5205 (solo este Mac) — tickets y contactos de todos los sitios, filtros por sitio, modo y
 estado, detalle con la conversación, visor de archivos, cambio de estado y notas. También:

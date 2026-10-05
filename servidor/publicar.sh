@@ -3,9 +3,11 @@
 #   1. Arranca server.py y abre un túnel gratuito de Cloudflare.
 #   2. Sube a GitHub publico/backend.js con la nueva dirección del túnel y la configuración
 #      visible de cada sitio → Cloudflare se actualiza solo.
-#   3. Al salir (Ctrl+C) deja la dirección vacía: los sitios muestran «asistente no disponible».
+#   3. Vigila el servidor y el túnel cada minuto; si algo cae (o el túnel de Cloudflare expira) termina con
+#      error, para que el servicio del Mac (servicio.sh) lo vuelva a arrancar con un túnel nuevo.
+#   4. Al salir (Ctrl+C o al detener el servicio) deja la dirección vacía: los sitios muestran «no disponible».
 # El Mac debe estar encendido y oMLX en marcha (con el modelo cargado).
-# Uso:  ./servidor/publicar.sh
+# Uso:  ./servidor/publicar.sh   (o como servicio del Mac:  ./servidor/servicio.sh instalar)
 set -uo pipefail
 cd "$(dirname "$0")"
 REPO=$(git rev-parse --show-toplevel) || exit 1
@@ -94,4 +96,18 @@ echo "  Mantén este Mac encendido y oMLX en marcha. Ctrl+C para desconectar el 
 echo
 echo "Consultas recibidas:"
 
-wait "$SERVER_PID" "$TUNNEL_PID"
+# Vigilancia: si el servidor o el túnel se caen, o el túnel deja de responder 3 veces seguidas
+# (los túneles gratuitos expiran, p. ej. tras dormir el Mac o cambiar de red), sale con error.
+FALLAS=0
+while true; do
+  sleep 60 & wait $!
+  kill -0 "$SERVER_PID" 2>/dev/null || { warn "$(date +%H:%M:%S)  El servidor se detuvo."; exit 1; }
+  kill -0 "$TUNNEL_PID" 2>/dev/null || { warn "$(date +%H:%M:%S)  El túnel se cerró."; exit 1; }
+  if curl -sf -m 15 -o /dev/null "$URL/health"; then
+    FALLAS=0
+  else
+    FALLAS=$((FALLAS + 1))
+    warn "$(date +%H:%M:%S)  El túnel no responde ($FALLAS/3)."
+    [ "$FALLAS" -ge 3 ] && { warn "Se cerrará para abrir un túnel nuevo."; exit 1; }
+  fi
+done
