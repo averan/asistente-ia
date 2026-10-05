@@ -2,6 +2,34 @@
 // y la configuración visible de cada sitio autorizado (nunca su contexto).
 window.ASISTENTE_BACKEND = "https://time-por-creation-matched.trycloudflare.com";
 window.ASISTENTE_SITIOS = {
+ "asistente-ia.faenabot.stream": {
+  "modo": "contacto",
+  "obligatorios": [
+   "necesidad"
+  ],
+  "al_menos_uno": [
+   "correo",
+   "telefono",
+   "otro"
+  ],
+  "confirmacion": "¡Gracias! Te contactaremos por {contacto} para preparar FaenaBot para tu sitio.",
+  "nombre": "FaenaBot",
+  "etiqueta": "Demo en vivo",
+  "avatar": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='4' y='.86em' font-size='82'>💬</text></svg>",
+  "saludo": "¡Hola! 👋 Soy **FaenaBot**, y esta conversación es una **demo**: así respondería en tu sitio web. Pregúntame lo que quieras sobre cómo funciono, o cuéntame a qué se dedica tu empresa y te muestro cómo te ayudaría.",
+  "sugerencias": [
+   "¿Qué puedes hacer en mi sitio?",
+   "¿Cómo se instala?",
+   "¿Dónde quedan mis datos?",
+   "Quiero FaenaBot para mi empresa"
+  ],
+  "no_disponible": "En este momento FaenaBot está apagado: corre en un computador propio y no en la nube 😉. Vuelve a intentarlo más tarde.",
+  "pie": "FaenaBot · IA en infraestructura propia · admite imágenes, PDF, Word, Excel y texto",
+  "adjuntos": true,
+  "color_principal": "#2f5bff",
+  "color_cabecera": "#0b1f33",
+  "color_acento": "#1fc8e3"
+ },
  "averan.github.io": {
   "modo": "contacto",
   "obligatorios": [
@@ -43,7 +71,7 @@ window.ASISTENTE_SITIOS = {
   "nombre": "FaenaBot",
   "etiqueta": "Demo en vivo",
   "avatar": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='4' y='.86em' font-size='82'>💬</text></svg>",
-  "saludo": "¡Hola! 👋 Soy **FaenaBot**, y esta conversación es la demo: así respondería en tu sitio web. Pregúntame lo que quieras sobre cómo funciono, o cuéntame a qué se dedica tu empresa y te muestro cómo te ayudaría.",
+  "saludo": "¡Hola! 👋 Soy **FaenaBot**, y esta conversación es una **demo**: así respondería en tu sitio web. Pregúntame lo que quieras sobre cómo funciono, o cuéntame a qué se dedica tu empresa y te muestro cómo te ayudaría.",
   "sugerencias": [
    "¿Qué puedes hacer en mi sitio?",
    "¿Cómo se instala?",
