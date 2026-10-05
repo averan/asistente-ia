@@ -29,6 +29,33 @@ window.ASISTENTE_SITIOS = {
   "color_cabecera": "",
   "color_acento": ""
  },
+ "faenabot.stream": {
+  "modo": "contacto",
+  "obligatorios": [
+   "necesidad"
+  ],
+  "al_menos_uno": [
+   "correo",
+   "telefono",
+   "otro"
+  ],
+  "confirmacion": "¡Gracias! Te contactaremos por {contacto} para coordinar la llamada o el Meet.",
+  "nombre": "IA Local",
+  "etiqueta": "Asistente IA Local",
+  "avatar": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='8' y='.85em' font-size='80'>🤖</text></svg>",
+  "saludo": "¡Hola! 👋 Soy un asistente de IA que funciona en un computador local, sin nube. ¿Quieres ver qué puede hacer la IA local por tu empresa?",
+  "sugerencias": [
+   "¿Qué es la IA local?",
+   "¿Qué soluciones puedo probar?",
+   "Quiero agendar un Meet"
+  ],
+  "no_disponible": "En este momento el asistente está apagado (corre en un computador local 😉). Vuelve a intentarlo más tarde.",
+  "pie": "IA en un computador local · admite imágenes, PDF, Word, Excel y texto",
+  "adjuntos": true,
+  "color_principal": "",
+  "color_cabecera": "",
+  "color_acento": ""
+ },
  "local-ia.andres-veran.workers.dev": {
   "modo": "contacto",
   "obligatorios": [

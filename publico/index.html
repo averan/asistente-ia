@@ -3,41 +3,118 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Asistente IA · integración</title>
+  <title>FaenaBot · Asistente IA privado</title>
+  <meta name="description" content="Asistente de inteligencia artificial para tu sitio web que corre en infraestructura propia. Se integra con una sola línea.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
   <style>
-    :root { --bg: #f7f8fb; --text: #141824; --muted: #5d6475; --card: #fff; --border: #e3e6ee; --accent: #2f5bff; }
-    @media (prefers-color-scheme: dark) { :root { --bg: #10131a; --text: #eef0f6; --muted: #a1a8b8; --card: #171b25; --border: #283041; --accent: #6f8cff; } }
+    :root {
+      --bg: #f7f8fb; --text: #141824; --muted: #5d6475; --card: #fff; --border: #e3e6ee;
+      --accent: #2f5bff; --accent-2: #1fc8e3; --hero: #0b1f33; --hero-text: #f2f6ff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #10131a; --text: #eef0f6; --muted: #a1a8b8; --card: #171b25; --border: #283041; --accent: #6f8cff; --hero: #0a1320; }
+    }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
-    main { width: min(760px, 100% - 32px); margin: 56px auto; }
-    h1 { font-size: clamp(28px, 5vw, 40px); margin: 0 0 8px; }
-    p.lead { color: var(--muted); margin: 0 0 32px; }
-    section { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; margin-bottom: 16px; }
-    h2 { font-size: 18px; margin: 0 0 8px; }
+    .wrap { width: min(980px, 100% - 32px); margin: 0 auto; }
+    header.hero { background: radial-gradient(1200px 500px at 85% -10%, color-mix(in srgb, var(--accent-2) 35%, transparent), transparent 60%), var(--hero); color: var(--hero-text); padding: 28px 0 72px; }
+    nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 56px; }
+    .brand { font-weight: 800; font-size: 20px; letter-spacing: -0.01em; }
+    .brand span { color: var(--accent-2); }
+    nav a { color: inherit; opacity: .85; text-decoration: none; font-size: 15px; }
+    nav a:hover { opacity: 1; }
+    h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 18px; max-width: 14ch; }
+    .lead { font-size: clamp(17px, 2.2vw, 20px); opacity: .85; max-width: 46ch; margin: 0 0 32px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 999px; font: 600 16px/1 system-ui, -apple-system, "Segoe UI", sans-serif; text-decoration: none; cursor: pointer; border: 2px solid transparent; }
+    .btn.primary { background: var(--accent-2); color: #06202b; }
+    .btn.ghost { border-color: color-mix(in srgb, var(--hero-text) 40%, transparent); color: var(--hero-text); background: transparent; }
+    .btn:hover { filter: brightness(1.08); }
+    .btn[hidden] { display: none; }
+    main section { padding: 64px 0 0; }
+    h2 { font-size: clamp(24px, 3.5vw, 32px); letter-spacing: -0.01em; margin: 0 0 8px; }
+    .sub { color: var(--muted); margin: 0 0 28px; max-width: 60ch; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .card { min-width: 0; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; }
+    .card .ico { font-size: 26px; }
+    .card h3 { font-size: 17px; margin: 8px 0 6px; }
+    .card p { margin: 0; color: var(--muted); font-size: 15px; }
+    ol.steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; counter-reset: s; }
+    ol.steps li { counter-increment: s; position: relative; padding-left: 70px; }
+    ol.steps li::before { content: counter(s); position: absolute; left: 22px; top: 22px; width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; display: grid; place-items: center; }
+    ol.steps h3 { margin-top: 4px; }
     code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; }
-    pre { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; overflow-x: auto; margin: 10px 0 0; }
+    pre { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; overflow-x: auto; margin: 10px 0; }
     .muted { color: var(--muted); font-size: 14px; }
+    footer { padding: 64px 0 40px; color: var(--muted); font-size: 14px; text-align: center; }
   </style>
 </head>
 <body>
-  <main>
-    <h1>💬 Asistente IA</h1>
-    <p class="lead">Asistente de inteligencia artificial que corre en infraestructura propia y se integra en cualquier sitio web con una sola línea.</p>
+  <header class="hero">
+    <div class="wrap">
+      <nav>
+        <div class="brand">Faena<span>Bot</span></div>
+        <a href="#integrar">Cómo integrarlo</a>
+      </nav>
+      <h1>Un asistente de IA privado para tu sitio web</h1>
+      <p class="lead">Responde a tus visitantes, registra contactos y tickets de mesa de ayuda, y entiende los archivos que le envían. El modelo corre en infraestructura propia, no en servicios de IA de terceros.</p>
+      <div class="actions">
+        <button class="btn primary" type="button" id="probar" hidden>💬 Pruébalo ahora</button>
+        <a class="btn ghost" href="#integrar">Integrarlo en mi sitio</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
     <section>
-      <h2>1. Pega esta línea antes de <code>&lt;/body&gt;</code></h2>
-      <pre>&lt;script src="https://asistente-ia.faenabot.stream/embed.js" defer&gt;&lt;/script&gt;</pre>
-      <p class="muted">WordPress: plugin WPCode → footer · Shopify: <code>theme.liquid</code> · Wix / Squarespace: código personalizado del pie de página.</p>
+      <h2>Qué hace</h2>
+      <p class="sub">Cada sitio tiene su propio asistente: su nombre, sus colores y lo que sabe de la empresa.</p>
+      <div class="grid">
+        <div class="card"><div class="ico">🔒</div><h3>Privado</h3><p>Las conversaciones las procesa un modelo que corre en un computador propio. Nada se envía a proveedores de IA externos.</p></div>
+        <div class="card"><div class="ico">🧩</div><h3>Una sola línea</h3><p>Se pega antes de <code>&lt;/body&gt;</code> y listo. Funciona en WordPress, Shopify, Wix o cualquier HTML.</p></div>
+        <div class="card"><div class="ico">📇</div><h3>Contactos</h3><p>Conversa con el visitante y le arma una solicitud de contacto que él revisa y envía con un botón.</p></div>
+        <div class="card"><div class="ico">🛠️</div><h3>Mesa de ayuda</h3><p>Registra incidentes y solicitudes de servicio con prioridad, equipo resolutor y evidencias.</p></div>
+        <div class="card"><div class="ico">📎</div><h3>Entiende archivos</h3><p>Imágenes, PDF, Word, Excel y texto: el visitante los adjunta y quedan guardados con su solicitud.</p></div>
+        <div class="card"><div class="ico">🎨</div><h3>A la medida</h3><p>Nombre, saludo, preguntas sugeridas, colores, datos obligatorios y conocimiento propio de cada empresa.</p></div>
+      </div>
     </section>
-    <section>
-      <h2>2. Pide que activen tu sitio</h2>
-      <p>El asistente solo aparece en los sitios autorizados. Cada sitio tiene su propia configuración: nombre, saludo, colores, lo que sabe responder y si registra solicitudes de contacto o tickets de mesa de ayuda.</p>
-    </section>
-    <section>
-      <h2>Opcional</h2>
-      <p class="muted">Abrir el asistente desde un botón propio:</p>
-      <pre>&lt;button onclick="asistenteIA.open()"&gt;Hablar con el asistente&lt;/button&gt;</pre>
+
+    <section id="integrar">
+      <h2>Cómo integrarlo</h2>
+      <p class="sub">Dos pasos, sin instalar nada en tu servidor.</p>
+      <ol class="steps">
+        <li class="card">
+          <h3>Pide que activemos tu sitio</h3>
+          <p>El asistente solo aparece en los sitios autorizados. Configuramos su nombre, saludo, colores, lo que sabe responder y si registra contactos o tickets.</p>
+        </li>
+        <li class="card">
+          <h3>Pega esta línea antes de <code>&lt;/body&gt;</code></h3>
+          <pre>&lt;script src="https://asistente-ia.faenabot.stream/embed.js" defer&gt;&lt;/script&gt;</pre>
+          <p class="muted">WordPress: plugin WPCode → footer · Shopify: <code>theme.liquid</code> · Wix / Squarespace: código personalizado del pie de página.</p>
+        </li>
+      </ol>
+      <div class="card" style="margin-top:16px">
+        <h3>Opcional: abrirlo desde un botón propio</h3>
+        <pre>&lt;button onclick="asistenteIA.open()"&gt;Hablar con el asistente&lt;/button&gt;</pre>
+      </div>
     </section>
   </main>
+
+  <footer class="wrap">FaenaBot · IA en infraestructura propia</footer>
+
+  <!-- Demo: el asistente aparece solo en los dominios autorizados (servidor/sitios/faenabot.stream.md) -->
+  <script src="embed.js" defer></script>
+  <script>
+    // «Pruébalo ahora» se muestra solo si el asistente se cargó en esta página.
+    (function waitForAssistant(tries) {
+      if (window.asistenteIA) {
+        const b = document.getElementById('probar');
+        b.hidden = false;
+        b.addEventListener('click', () => window.asistenteIA.open());
+      } else if (tries > 0) {
+        setTimeout(() => waitForAssistant(tries - 1), 300);
+      }
+    })(30);
+  </script>
 </body>
 </html>
