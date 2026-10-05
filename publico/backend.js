@@ -1,6 +1,6 @@
 // Lo genera servidor/publicar.sh: dirección del servidor del asistente ('' = no disponible)
 // y la configuración visible de cada sitio autorizado (nunca su contexto).
-window.ASISTENTE_BACKEND = "https://fork-returning-increased-watching.trycloudflare.com";
+window.ASISTENTE_BACKEND = "";
 window.ASISTENTE_SITIOS = {
  "averan.github.io": {
   "modo": "contacto",
