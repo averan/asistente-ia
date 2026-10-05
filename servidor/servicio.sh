@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Deja el asistente como servicio del Mac (launchd): arranca solo al iniciar sesión, sigue funcionando
 # aunque se cierre la terminal o la app, y se reinicia si falla o si el túnel de Cloudflare expira.
-# Uso:  ./servidor/servicio.sh instalar | desinstalar | reiniciar | estado | log
+# Uso:  ./servidor/servicio.sh instalar | detener | iniciar | reiniciar | estado | log | desinstalar
 set -uo pipefail
 cd "$(dirname "$0")"
 DIR=$(pwd)
@@ -10,7 +10,7 @@ PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 LOG="$HOME/Library/Logs/asistente-ia.log"
 DOMINIO="gui/$(id -u)"
 
-instalado() { launchctl print "$DOMINIO/$LABEL" >/dev/null 2>&1; }
+instalado() { launchctl print "$DOMINIO/$LABEL" >/dev/null 2>&1; }   # cargado en launchd (corriendo o reintentando)
 
 instalar() {
   if lsof -iTCP:5204 -sTCP:LISTEN >/dev/null 2>&1 && ! instalado; then
@@ -46,18 +46,37 @@ desinstalar() {
   echo "Servicio desinstalado."
 }
 
+detener() {
+  instalado || { echo "El asistente ya está detenido."; return; }
+  echo "Deteniendo (publica el aviso «no disponible»)…"
+  launchctl bootout "$DOMINIO/$LABEL"   # los sitios muestran «no disponible»
+  for _ in $(seq 1 60); do instalado || break; sleep 1; done
+  echo "Asistente detenido. Vuelve a arrancar con  ./servidor/servicio.sh iniciar  o al iniciar sesión."
+}
+
+iniciar() {
+  [ -f "$PLIST" ] || { echo "El servicio no está instalado (./servidor/servicio.sh instalar)."; exit 1; }
+  instalado && { echo "El asistente ya está corriendo."; return; }
+  launchctl bootstrap "$DOMINIO" "$PLIST" && echo "Asistente iniciado: abre un túnel nuevo y en ~1 min responde en los sitios."
+}
+
 case "${1:-estado}" in
   instalar)    instalar ;;
+  detener)     detener ;;
+  iniciar)     iniciar ;;
   desinstalar) desinstalar ;;
-  reiniciar)   instalado && launchctl kill SIGTERM "$DOMINIO/$LABEL" && echo "Reiniciando (abre un túnel nuevo en ~1 min)…" ;;
+  reiniciar)   if instalado; then launchctl kill SIGTERM "$DOMINIO/$LABEL" && echo "Reiniciando (abre un túnel nuevo en ~1 min)…"
+               else echo "El asistente está detenido: usa  ./servidor/servicio.sh iniciar"; fi ;;
   log)         tail -n 40 -f "$LOG" ;;
   estado)
     if instalado; then
       launchctl print "$DOMINIO/$LABEL" | awk -F' = ' '/^\t(state|pid|runs|last exit code) = /{sub(/^\t/,"",$1); print "  " $1 ": " $2}'
       grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$LOG" 2>/dev/null | tail -1 | sed 's/^/  túnel: /'
       true
+    elif [ -f "$PLIST" ]; then
+      echo "  state: detenido (arranca con  ./servidor/servicio.sh iniciar  o al iniciar sesión)"
     else
       echo "  El servicio no está instalado (./servidor/servicio.sh instalar)."
     fi ;;
-  *) echo "Uso: $0 instalar | desinstalar | reiniciar | estado | log"; exit 1 ;;
+  *) echo "Uso: $0 instalar | detener | iniciar | reiniciar | estado | log | desinstalar"; exit 1 ;;
 esac

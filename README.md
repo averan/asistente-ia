@@ -65,7 +65,9 @@ terminal o la app, y se reinicia solo si falla o si el túnel de Cloudflare expi
 ./servidor/servicio.sh estado        # ¿está corriendo? ¿qué túnel usa?
 ./servidor/servicio.sh log           # consultas recibidas y avisos (Ctrl+C para salir del registro)
 ./servidor/servicio.sh reiniciar     # túnel nuevo
-./servidor/servicio.sh desinstalar   # lo detiene: los sitios muestran «no disponible»
+./servidor/servicio.sh detener       # lo pausa (los sitios muestran «no disponible») hasta «iniciar» o el próximo inicio de sesión
+./servidor/servicio.sh iniciar       # lo vuelve a encender
+./servidor/servicio.sh desinstalar   # lo detiene y deja de arrancar al iniciar sesión
 ```
 
 O a mano, en una terminal: `./servidor/publicar.sh` (Ctrl+C para desconectarlo).
