@@ -1,0 +1,13 @@
+// Configuración del Worker que publica el widget (Cloudflare lo despliega solo en cada push).
+// Los dominios se declaran aquí: Wrangler reemplaza en cada despliegue los que se agreguen en el dashboard,
+// así que cualquier dominio nuevo de este Worker debe agregarse a "routes".
+{
+  "name": "asistente-ia",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./publico" },
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "asistente-ia.faenabot.stream", "custom_domain": true },
+    { "pattern": "faenabot.stream", "custom_domain": true }
+  ]
+}

@@ -5,3 +5,4 @@ servidor/datos/
 servidor/sitios/*.md
 !servidor/sitios/_plantilla-contacto.md
 !servidor/sitios/_plantilla-ticket.md
+.wrangler/
