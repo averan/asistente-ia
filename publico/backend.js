@@ -39,22 +39,23 @@ window.ASISTENTE_SITIOS = {
    "telefono",
    "otro"
   ],
-  "confirmacion": "¡Gracias! Te contactaremos por {contacto} para coordinar la llamada o el Meet.",
-  "nombre": "IA Local",
-  "etiqueta": "Asistente IA Local",
-  "avatar": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='8' y='.85em' font-size='80'>🤖</text></svg>",
-  "saludo": "¡Hola! 👋 Soy un asistente de IA que funciona en un computador local, sin nube. ¿Quieres ver qué puede hacer la IA local por tu empresa?",
+  "confirmacion": "¡Gracias! Te contactaremos por {contacto} para preparar FaenaBot para tu sitio.",
+  "nombre": "FaenaBot",
+  "etiqueta": "Demo en vivo",
+  "avatar": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='4' y='.86em' font-size='82'>💬</text></svg>",
+  "saludo": "¡Hola! 👋 Soy **FaenaBot**, y esta conversación es la demo: así respondería en tu sitio web. Pregúntame lo que quieras sobre cómo funciono, o cuéntame a qué se dedica tu empresa y te muestro cómo te ayudaría.",
   "sugerencias": [
-   "¿Qué es la IA local?",
-   "¿Qué soluciones puedo probar?",
-   "Quiero agendar un Meet"
+   "¿Qué puedes hacer en mi sitio?",
+   "¿Cómo se instala?",
+   "¿Dónde quedan mis datos?",
+   "Quiero FaenaBot para mi empresa"
   ],
-  "no_disponible": "En este momento el asistente está apagado (corre en un computador local 😉). Vuelve a intentarlo más tarde.",
-  "pie": "IA en un computador local · admite imágenes, PDF, Word, Excel y texto",
+  "no_disponible": "En este momento FaenaBot está apagado: corre en un computador propio y no en la nube 😉. Vuelve a intentarlo más tarde.",
+  "pie": "FaenaBot · IA en infraestructura propia · admite imágenes, PDF, Word, Excel y texto",
   "adjuntos": true,
-  "color_principal": "",
-  "color_cabecera": "",
-  "color_acento": ""
+  "color_principal": "#2f5bff",
+  "color_cabecera": "#0b1f33",
+  "color_acento": "#1fc8e3"
  },
  "local-ia.andres-veran.workers.dev": {
   "modo": "contacto",
