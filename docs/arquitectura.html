@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arquitectura de FaenaBot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: documento técnico de una columna (~860px), diagrama ancho al inicio, referencia de servicios en filas */
+  :root {
+    --bg: #f5f7fa; --surface: #ffffff; --ink: #0e1a2b; --muted: #556275; --line: #d8dfe8;
+    --accent: #0b7f93; --accent-soft: #e0f3f6; --mac: #b8532a; --mac-soft: #fbece4;
+    --neutral-soft: #eef1f5; --code-bg: #edf1f6;
+    --get: #1f6f3f; --get-soft: #e3f3e8; --post: #2d4fc7; --post-soft: #e7ecfc; --opt: #6b5a2a; --opt-soft: #f4efdf;
+    --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+    --body: "Figtree", "Helvetica Neue", "Segoe UI", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0c1420; --surface: #121c2b; --ink: #e6edf6; --muted: #9babbf; --line: #24344a;
+      --accent: #45cfe4; --accent-soft: #10303a; --mac: #f08d61; --mac-soft: #3a2217;
+      --neutral-soft: #1a2638; --code-bg: #0f1826;
+      --get: #7fd69e; --get-soft: #15301f; --post: #9fb3ff; --post-soft: #1b2547; --opt: #e3cb85; --opt-soft: #332b14;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0c1420; --surface: #121c2b; --ink: #e6edf6; --muted: #9babbf; --line: #24344a;
+    --accent: #45cfe4; --accent-soft: #10303a; --mac: #f08d61; --mac-soft: #3a2217;
+    --neutral-soft: #1a2638; --code-bg: #0f1826;
+    --get: #7fd69e; --get-soft: #15301f; --post: #9fb3ff; --post-soft: #1b2547; --opt: #e3cb85; --opt-soft: #332b14;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 var(--body); padding: 0 16px; }
+  .page { max-width: 860px; margin: 0 auto; padding-block: 48px 72px; display: grid; gap: 56px; }
+  h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+  h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 700; letter-spacing: -0.01em; }
+  h2 { font-size: 24px; font-weight: 700; }
+  h3 { font-size: 17px; font-weight: 500; }
+  p { margin: 0; }
+  code, .mono { font-family: var(--mono); font-size: 0.86em; }
+  code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; overflow-wrap: anywhere; }
+  .eyebrow { font: 500 12px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  header { display: grid; gap: 14px; }
+  .lead { color: var(--muted); font-size: 18px; max-width: 62ch; }
+  section { display: grid; gap: 18px; min-width: 0; }
+  .sub { color: var(--muted); max-width: 64ch; }
+
+  .figure { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; overflow-x: auto; }
+  .figure svg { display: block; width: 100%; min-width: 600px; height: auto; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--muted); font-size: 14px; }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 14px; height: 14px; border-radius: 4px; border: 1px solid; }
+  .sw.n { background: var(--neutral-soft); border-color: var(--muted); }
+  .sw.c { background: var(--accent-soft); border-color: var(--accent); }
+  .sw.m { background: var(--mac-soft); border-color: var(--mac); }
+
+  svg .box { stroke-width: 1; }
+  svg .n { fill: var(--neutral-soft); stroke: var(--muted); }
+  svg .c { fill: var(--accent-soft); stroke: var(--accent); }
+  svg .m { fill: var(--mac-soft); stroke: var(--mac); }
+  svg .tt { fill: var(--ink); font: 600 14px var(--body); }
+  svg .ts { fill: var(--muted); font: 400 12px var(--body); }
+  svg .tm { fill: var(--muted); font: 400 11.5px var(--mono); }
+  svg .group { fill: none; stroke: var(--line); stroke-dasharray: 5 5; }
+  svg .gl { fill: var(--muted); font: 500 12px var(--mono); letter-spacing: 0.04em; }
+  svg .wire { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+
+  ol.flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: f; }
+  ol.flow li { counter-increment: f; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 14px; align-items: start; }
+  ol.flow li::before { content: counter(f); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 600 14px var(--mono); background: var(--accent-soft); color: var(--accent); margin-top: 1px; }
+  ol.flow strong { font-weight: 600; }
+
+  .services { display: grid; gap: 12px; }
+  .svc { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; display: grid; gap: 10px; min-width: 0; }
+  .route { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+  .route .path { font: 500 16px var(--mono); overflow-wrap: anywhere; }
+  .route .what { color: var(--muted); font-size: 15px; }
+  .verb { font: 500 12px/1 var(--mono); padding: 5px 8px; border-radius: 6px; letter-spacing: 0.04em; }
+  .verb.get { color: var(--get); background: var(--get-soft); }
+  .verb.post { color: var(--post); background: var(--post-soft); }
+  .verb.opt { color: var(--opt); background: var(--opt-soft); }
+  .svc ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+  .svc li { padding-left: 2px; }
+  .svc li::marker { color: var(--muted); }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+  .panel h3 { font-size: 16px; }
+  .panel p, .panel li { color: var(--muted); font-size: 15px; }
+  .panel ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 560px; }
+  th, td { text-align: left; padding: 11px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 500 12px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+  td .mono { color: var(--muted); }
+  .pill { display: inline-block; font: 500 12px/1 var(--mono); padding: 5px 8px; border-radius: 999px; }
+  .pill.contacto { background: var(--accent-soft); color: var(--accent); }
+  .pill.ticket { background: var(--mac-soft); color: var(--mac); }
+
+  pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; overflow-x: auto; font: 14px/1.6 var(--mono); }
+  .cmds { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+  .cmd { display: grid; grid-template-columns: minmax(0, 230px) minmax(0, 1fr); gap: 16px; padding: 11px 16px; border-bottom: 1px solid var(--line); }
+  .cmd:last-child { border-bottom: 0; }
+  .cmd code { background: none; padding: 0; font-size: 14px; }
+  .cmd span { color: var(--muted); font-size: 15px; }
+  @media (max-width: 560px) { .cmd { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+  footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
+</style>
+</head>
+<body>
+
+<main class="page">
+  <header>
+    <span class="eyebrow">Asistente IA en infraestructura propia</span>
+    <h1>Arquitectura de FaenaBot</h1>
+    <p class="lead">Un solo asistente de IA atiende a varios sitios web. Cada sitio lo integra con una línea de código; las conversaciones las responde un modelo que corre en un Mac propio, sin pasar por servicios de IA de terceros.</p>
+  </header>
+
+  <section aria-labelledby="h-mapa">
+    <h2 id="h-mapa">Cómo se conecta todo</h2>
+    <div class="figure">
+      <svg viewBox="0 0 680 520" role="img" aria-labelledby="d-t d-d">
+        <title id="d-t">Diagrama de la solución</title>
+        <desc id="d-d">Cinco sitios cargan el widget desde Cloudflare y conversan por un túnel con el servidor del Mac, que usa oMLX, la configuración por sitio y la base de datos. publicar.sh publica la dirección del túnel en GitHub, desde donde Cloudflare despliega el widget.</desc>
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+        <g><rect class="box n" x="40" y="40" width="108" height="56" rx="6"/><text class="tt" x="94" y="64" text-anchor="middle">Faena</text><text class="ts" x="94" y="82" text-anchor="middle">Vercel</text></g>
+        <g><rect class="box n" x="163" y="40" width="108" height="56" rx="6"/><text class="tt" x="217" y="64" text-anchor="middle">IA Local</text><text class="ts" x="217" y="82" text-anchor="middle">Cloudflare</text></g>
+        <g><rect class="box n" x="286" y="40" width="108" height="56" rx="6"/><text class="tt" x="340" y="64" text-anchor="middle">minimoweb</text><text class="ts" x="340" y="82" text-anchor="middle">GitHub Pages</text></g>
+        <g><rect class="box n" x="409" y="40" width="108" height="56" rx="6"/><text class="tt" x="463" y="64" text-anchor="middle">Wodobox</text><text class="ts" x="463" y="82" text-anchor="middle">Mesa de ayuda</text></g>
+        <g><rect class="box n" x="532" y="40" width="108" height="56" rx="6"/><text class="tt" x="586" y="64" text-anchor="middle">FaenaBot</text><text class="ts" x="586" y="82" text-anchor="middle">Demo</text></g>
+        <path class="wire" d="M94 96V112M217 96V112M340 96V112M463 96V112M586 96V112M94 112H586"/>
+        <line class="wire" x1="159" y1="112" x2="159" y2="161" marker-end="url(#ah)"/>
+        <line class="wire" x1="363" y1="112" x2="363" y2="161" marker-end="url(#ah)"/>
+        <rect class="group" x="30" y="136" width="420" height="104" rx="10"/>
+        <text class="gl" x="44" y="154">CLOUDFLARE · INTERNET</text>
+        <g><rect class="box c" x="44" y="164" width="230" height="60" rx="6"/><text class="tt" x="159" y="189" text-anchor="middle">Widget del asistente</text><text class="tm" x="159" y="208" text-anchor="middle">asistente-ia.faenabot.stream</text></g>
+        <g><rect class="box c" x="290" y="164" width="146" height="60" rx="6"/><text class="tt" x="363" y="189" text-anchor="middle">Túnel</text><text class="tm" x="363" y="208" text-anchor="middle">trycloudflare.com</text></g>
+        <g><rect class="box n" x="480" y="164" width="160" height="60" rx="6"/><text class="tt" x="560" y="189" text-anchor="middle">GitHub</text><text class="ts" x="560" y="208" text-anchor="middle">dirección del túnel</text></g>
+        <line class="wire" x1="480" y1="194" x2="453" y2="194" marker-end="url(#ah)"/>
+        <line class="wire" x1="363" y1="224" x2="363" y2="307" marker-end="url(#ah)"/>
+        <line class="wire" x1="565" y1="310" x2="565" y2="227" marker-end="url(#ah)"/>
+        <rect class="group" x="30" y="280" width="620" height="200" rx="10"/>
+        <text class="gl" x="44" y="298">MAC · SERVICIO LAUNCHD</text>
+        <g><rect class="box m" x="44" y="310" width="150" height="60" rx="6"/><text class="tt" x="119" y="335" text-anchor="middle">oMLX :8000</text><text class="ts" x="119" y="354" text-anchor="middle">modelo de IA local</text></g>
+        <g><rect class="box m" x="230" y="310" width="180" height="60" rx="6"/><text class="tt" x="320" y="335" text-anchor="middle">Servidor :5204</text><text class="ts" x="320" y="354" text-anchor="middle">CORS, prompt, límites</text></g>
+        <g><rect class="box n" x="490" y="310" width="150" height="60" rx="6"/><text class="tt" x="565" y="335" text-anchor="middle">publicar.sh</text><text class="ts" x="565" y="354" text-anchor="middle">túnel + vigilancia</text></g>
+        <line class="wire" x1="230" y1="340" x2="197" y2="340" marker-end="url(#ah)"/>
+        <g><rect class="box m" x="58" y="400" width="170" height="60" rx="6"/><text class="tt" x="143" y="425" text-anchor="middle">Config. por sitio</text><text class="tm" x="143" y="444" text-anchor="middle">sitios/&lt;dominio&gt;.md</text></g>
+        <g><rect class="box m" x="250" y="400" width="160" height="60" rx="6"/><text class="tt" x="330" y="425" text-anchor="middle">Base de datos</text><text class="ts" x="330" y="444" text-anchor="middle">tickets y contactos</text></g>
+        <g><rect class="box m" x="440" y="400" width="150" height="60" rx="6"/><text class="tt" x="515" y="425" text-anchor="middle">Gestión :5205</text><text class="ts" x="515" y="444" text-anchor="middle">solo este Mac</text></g>
+        <line class="wire" x1="330" y1="370" x2="330" y2="397" marker-end="url(#ah)"/>
+        <path class="wire" d="M260 370V385H143V397" marker-end="url(#ah)"/>
+        <line class="wire" x1="440" y1="430" x2="413" y2="430" marker-end="url(#ah)"/>
+      </svg>
+    </div>
+    <div class="legend" aria-hidden="true">
+      <span><i class="sw n"></i>Sitios y publicación</span>
+      <span><i class="sw c"></i>Internet (Cloudflare)</span>
+      <span><i class="sw m"></i>Solo en el Mac</span>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-flujo">
+    <h2 id="h-flujo">Recorrido de una conversación</h2>
+    <ol class="flow">
+      <li><p><strong>El visitante abre un sitio</strong> que tiene la línea del asistente. El navegador descarga el widget desde Cloudflare, junto con <code>backend.js</code>, que trae la dirección vigente del túnel.</p></li>
+      <li><p><strong>El widget pide la configuración de su sitio</strong> a <code>GET /api/config</code>: nombre, saludo, colores y si registra contactos o tickets. Un sitio sin archivo en <code>sitios/</code> recibe 403 y el widget no aparece.</p></li>
+      <li><p><strong>Cada mensaje va a <code>POST /v1/chat/completions</code></strong>. El servidor antepone las instrucciones del sitio, aplica los límites y reenvía la conversación a oMLX; la respuesta vuelve palabra por palabra.</p></li>
+      <li><p><strong>Cuando el visitante pulsa «Enviar solicitud»</strong>, el widget llama a <code>POST /api/solicitudes</code>. El servidor valida los datos y los archivos, la guarda con su número (FAE, TCK o FBT) y aparece en la gestión.</p></li>
+      <li><p><strong>Si el Mac o el túnel no están disponibles</strong>, el widget muestra el aviso propio del sitio con sus colores, porque <code>backend.js</code> guarda esa configuración pública.</p></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="h-servicios">
+    <h2 id="h-servicios">Servicios del servidor :5204</h2>
+    <p class="sub">El servidor escucha solo en el Mac (<code>127.0.0.1:5204</code>) y llega a internet únicamente por el túnel. Toda petición con origen de navegador debe venir de un sitio autorizado.</p>
+    <div class="services">
+      <article class="svc">
+        <div class="route"><span class="verb get">GET</span><span class="path">/api/config</span><span class="what">Configuración visible del sitio</span></div>
+        <ul>
+          <li>Identifica el sitio por la cabecera <code>Origin</code> y responde con su modo, nombre, etiqueta, avatar, saludo, sugerencias, colores, aviso de «no disponible», pie, adjuntos y datos obligatorios.</li>
+          <li>Nunca entrega el contexto ni las instrucciones del sitio.</li>
+          <li>403 si el sitio no tiene archivo en <code>sitios/</code>.</li>
+        </ul>
+      </article>
+      <article class="svc">
+        <div class="route"><span class="verb post">POST</span><span class="path">/v1/chat/completions</span><span class="what">Conversación con el modelo</span></div>
+        <ul>
+          <li>Pone el prompt en el servidor: contexto del sitio más las reglas comunes de su modo (<code>reglas/contacto.md</code> o <code>reglas/ticket.md</code>). El navegador no puede cambiarlo.</li>
+          <li>Reenvía a oMLX en streaming, solo con el modelo ya cargado. No permite herramientas, desactiva el razonamiento extendido, limita <code>max_tokens</code> a 1024 y la temperatura a 0–1.</li>
+          <li>Acepta texto e imágenes (PNG, JPEG, GIF, WebP; hasta 6 por mensaje) y usa los últimos 40 mensajes.</li>
+          <li>Si el visitante escribe un correo o teléfono, agrega un recordatorio para que el modelo presente la solicitud.</li>
+          <li>Límites: 20 mensajes por minuto por visitante (429) y 2 respuestas simultáneas (503 «ocupado»).</li>
+        </ul>
+      </article>
+      <article class="svc">
+        <div class="route"><span class="verb post">POST</span><span class="path">/api/solicitudes</span><span class="what">Registro de contactos y tickets</span></div>
+        <ul>
+          <li>Valida los datos obligatorios del sitio, que haya al menos un medio de contacto cuando el sitio lo exige y el formato del correo.</li>
+          <li>Archivos: hasta 10 por solicitud, 10 MB cada uno y 25 MB en total. El tipo se comprueba por el contenido real: imágenes, PDF, Word (.docx), Excel (.xlsx, .xls), texto y logs.</li>
+          <li>Guarda la solicitud con la conversación y los archivos (con su SHA-256) y devuelve el número correlativo del sitio.</li>
+          <li>Límite: 5 solicitudes por minuto por visitante.</li>
+        </ul>
+      </article>
+      <article class="svc">
+        <div class="route"><span class="verb get">GET</span><span class="path">/health</span><span class="verb get">GET</span><span class="path">/v1/models/status</span><span class="what">Estado del modelo</span></div>
+        <ul>
+          <li>Consulta a oMLX si está en marcha y qué modelos están cargados. Las respuestas se filtran: no exponen rutas locales, tamaños ni configuración interna.</li>
+        </ul>
+      </article>
+      <article class="svc">
+        <div class="route"><span class="verb opt">OPTIONS</span><span class="path">*</span><span class="what">Permisos del navegador (CORS)</span></div>
+        <ul>
+          <li>Responde la consulta previa del navegador solo para sitios autorizados. Cualquier otro método recibe 405 y cualquier otra ruta, 404.</li>
+        </ul>
+      </article>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Reglas que aplican a todo</h3>
+        <ul>
+          <li>Solo sitios con archivo en <code>sitios/</code>, siempre <code>https</code>.</li>
+          <li>Se autorizan sin reiniciar: el archivo se lee en cada consulta.</li>
+          <li>La clave de oMLX nunca sale del Mac.</li>
+          <li>Mensajes de hasta 25 MB con imágenes y documentos.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Registro</h3>
+        <p>El servidor solo anota cada conversación (hora, estado y duración) y cada solicitud registrada o rechazada, con su motivo. Se ve con <code>servicio.sh log</code>.</p>
+      </div>
+      <div class="panel">
+        <h3>Gestión :5205</h3>
+        <p>Página aparte, que arranca el mismo servidor y no pasa por el túnel. Acepta conexiones solo desde el Mac: lista, filtros, conversación, archivos, estado y notas.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-sitios">
+    <h2 id="h-sitios">Sitios conectados</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Sitio</th><th>Modo</th><th>Numeración</th><th>Publicado en</th></tr></thead>
+        <tbody>
+          <tr><td>Faena Growth Partner<br><span class="mono">web-vercel-zeta-red.vercel.app</span></td><td><span class="pill contacto">contacto</span></td><td class="mono">FAE-0001…</td><td>Vercel</td></tr>
+          <tr><td>IA Local<br><span class="mono">local-ia.faenabot.stream</span></td><td><span class="pill contacto">contacto</span></td><td class="mono">FAE-0001…</td><td>Cloudflare Workers</td></tr>
+          <tr><td>minimoweb<br><span class="mono">averan.github.io</span></td><td><span class="pill contacto">contacto</span></td><td class="mono">FAE-0001…</td><td>GitHub Pages</td></tr>
+          <tr><td>Wodobox · mesa de ayuda<br><span class="mono">wodobox-web.faenabot.stream</span></td><td><span class="pill ticket">ticket</span></td><td class="mono">TCK-0001…</td><td>Cloudflare Workers</td></tr>
+          <tr><td>FaenaBot · demo<br><span class="mono">faenabot.stream</span></td><td><span class="pill contacto">contacto</span></td><td class="mono">FBT-0001…</td><td>Cloudflare Workers</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-integrar">
+    <h2 id="h-integrar">Integrar un sitio nuevo</h2>
+    <ol class="flow">
+      <li><p><strong>Autorizarlo en el servidor:</strong> crear <code>sitios/&lt;dominio&gt;.md</code> desde una plantilla (contacto o ticket). Arriba va lo visible (nombre, saludo, colores, datos obligatorios); abajo, lo que sabe el asistente de esa empresa.</p></li>
+      <li><p><strong>Pegar la línea</strong> antes de <code>&lt;/body&gt;</code> del sitio:</p></li>
+    </ol>
+    <pre>&lt;script src="https://asistente-ia.faenabot.stream/embed.js" defer&gt;&lt;/script&gt;</pre>
+  </section>
+
+  <section aria-labelledby="h-operacion">
+    <h2 id="h-operacion">Operación en el Mac</h2>
+    <p class="sub"><code>publicar.sh</code> corre como servicio del Mac: arranca al iniciar sesión, abre el túnel y publica su dirección. Cada minuto revisa el servidor y el túnel; si el túnel deja de responder 3 veces seguidas, el servicio se reinicia con uno nuevo.</p>
+    <div class="cmds">
+      <div class="cmd"><code>servicio.sh estado</code><span>Si está corriendo y qué túnel usa</span></div>
+      <div class="cmd"><code>servicio.sh log</code><span>Conversaciones y solicitudes en vivo</span></div>
+      <div class="cmd"><code>servicio.sh detener</code><span>Lo pausa; los sitios muestran «no disponible»</span></div>
+      <div class="cmd"><code>servicio.sh iniciar</code><span>Lo vuelve a encender (túnel nuevo en ~1 min)</span></div>
+      <div class="cmd"><code>servicio.sh reiniciar</code><span>Fuerza un túnel nuevo</span></div>
+      <div class="cmd"><code>servicio.sh desinstalar</code><span>Lo quita del inicio de sesión</span></div>
+    </div>
+  </section>
+
+  <footer>Código: repositorio <span class="mono">averan/asistente-ia</span> · el widget se publica en Cloudflare Workers; el servidor, la base de datos y la configuración de cada sitio quedan solo en el Mac.</footer>
+</main>
+</body>
+</html>

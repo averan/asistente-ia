@@ -12,6 +12,8 @@ Cualquier sitio ──<script src="https://asistente-ia.faenabot.stream/embed.js
 Gestión (solo este Mac): http://localhost:5205
 ```
 
+Documentación de la solución (diagrama, servicios del servidor :5204 y operación): [docs/arquitectura.html](docs/arquitectura.html).
+
 ```
 publico/     Lo que publica Cloudflare (Worker con despliegue desde Git; directorio publico)
   embed.js       la línea que se pega en cada sitio
