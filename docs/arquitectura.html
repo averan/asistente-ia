@@ -111,6 +111,12 @@
   .cmd code { background: none; padding: 0; font-size: 14px; }
   .cmd span { color: var(--muted); font-size: 15px; }
   @media (max-width: 560px) { .cmd { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+  .tests { display: grid; gap: 14px; }
+  .test { display: grid; gap: 8px; min-width: 0; }
+  .test h3 { font-size: 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+  .test h3 .exp { font: 500 12px/1 var(--mono); color: var(--muted); }
+  .note { background: var(--mac-soft); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; font-size: 15px; }
+  td.code { font: 500 14px var(--mono); white-space: nowrap; }
   footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
 </style>
 </head>
@@ -266,6 +272,76 @@
       <li><p><strong>Pegar la línea</strong> antes de <code>&lt;/body&gt;</code> del sitio:</p></li>
     </ol>
     <pre>&lt;script src="https://asistente-ia.faenabot.stream/embed.js" defer&gt;&lt;/script&gt;</pre>
+  </section>
+
+  <section aria-labelledby="h-probar">
+    <h2 id="h-probar">Probar los servicios con curl</h2>
+    <p class="sub">La forma rápida es el script del repositorio, que ejecuta las 12 pruebas y marca cada una con ✓ o ✗. Ninguna crea solicitudes reales.</p>
+    <pre>./docs/probar-servicios.sh             # en el Mac (localhost:5204)
+./docs/probar-servicios.sh --publico   # desde cualquier equipo, por el túnel vigente</pre>
+    <p class="sub">Para probar a mano, primero define el servidor y un sitio autorizado:</p>
+    <pre>BASE=http://localhost:5204        # en el Mac
+ORIGEN=https://faenabot.stream    # cualquier sitio con archivo en sitios/
+
+# Desde fuera del Mac, usa la dirección vigente del túnel:
+BASE=$(curl -s https://asistente-ia.faenabot.stream/backend.js | grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com')</pre>
+    <div class="tests">
+      <div class="test">
+        <h3>Estado y modelo cargado <span class="exp">200</span></h3>
+        <pre>curl -s $BASE/health
+curl -s $BASE/v1/models/status</pre>
+      </div>
+      <div class="test">
+        <h3>Configuración de un sitio <span class="exp">200 · 403 si no está autorizado</span></h3>
+        <pre>curl -s -H "Origin: $ORIGEN" $BASE/api/config
+curl -s -H "Origin: https://ejemplo.com" $BASE/api/config</pre>
+      </div>
+      <div class="test">
+        <h3>Permiso del navegador (CORS) <span class="exp">204</span></h3>
+        <pre>curl -i -X OPTIONS -H "Origin: $ORIGEN" -H "Access-Control-Request-Method: POST" \
+  $BASE/v1/chat/completions</pre>
+      </div>
+      <div class="test">
+        <h3>Conversación <span class="exp">200 · 404 con un modelo no cargado</span></h3>
+        <pre>MODELO=$(curl -s $BASE/v1/models/status | python3 -c 'import json,sys; print([m["id"] for m in json.load(sys.stdin)["models"] if m["loaded"]][0])')
+
+# respuesta completa
+curl -s $BASE/v1/chat/completions -H "Origin: $ORIGEN" -H "Content-Type: application/json" \
+  -d '{"model":"'$MODELO'","stream":false,"max_tokens":200,
+       "messages":[{"role":"user","content":"¿Cómo se instala FaenaBot?"}]}'
+
+# en streaming, como la recibe el widget
+curl -sN $BASE/v1/chat/completions -H "Origin: $ORIGEN" -H "Content-Type: application/json" \
+  -d '{"model":"'$MODELO'","stream":true,"messages":[{"role":"user","content":"Hola"}]}'</pre>
+      </div>
+      <div class="test">
+        <h3>Validaciones de solicitudes <span class="exp">400</span></h3>
+        <pre># faltan datos obligatorios del sitio
+curl -s $BASE/api/solicitudes -H "Origin: $ORIGEN" -H "Content-Type: application/json" \
+  -d '{"correo":"no-es-correo"}'
+
+# archivo no admitido (el tipo se revisa por su contenido)
+curl -s $BASE/api/solicitudes -H "Origin: $ORIGEN" -H "Content-Type: application/json" \
+  -d '{"necesidad":"Prueba","correo":"prueba@ejemplo.com",
+       "archivos":[{"nombre":"programa.exe","contenido_base64":"TVqQAAMAAAAEAAAA"}]}'</pre>
+        <p class="note">Una solicitud con datos válidos se guarda de verdad y recibe su número (201). Para probar el registro completo, usa el widget del sitio; los archivos van en <code>archivos</code> como <code>{"nombre", "contenido_base64"}</code>.</p>
+      </div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Código</th><th>Significa</th></tr></thead>
+        <tbody>
+          <tr><td class="code">200 · 201 · 204</td><td>Correcto: respuesta, solicitud registrada (con su número) o permiso CORS concedido.</td></tr>
+          <tr><td class="code">400</td><td>Petición o datos no válidos; el mensaje dice qué corregir.</td></tr>
+          <tr><td class="code">403</td><td>El sitio (cabecera <code>Origin</code>) no está autorizado.</td></tr>
+          <tr><td class="code">404 · 405</td><td>Ruta inexistente o método no admitido; en el chat, 404 también indica un modelo que no está cargado.</td></tr>
+          <tr><td class="code">413</td><td>Mensaje o archivos demasiado grandes.</td></tr>
+          <tr><td class="code">429</td><td>Demasiados mensajes o solicitudes seguidas del mismo visitante.</td></tr>
+          <tr><td class="code">502 · 503</td><td>oMLX no responde, o ya hay 2 respuestas en curso.</td></tr>
+          <tr><td class="code">530</td><td>Lo devuelve Cloudflare: el túnel no llega al Mac (servicio detenido o túnel vencido).</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <section aria-labelledby="h-operacion">

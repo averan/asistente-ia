@@ -12,7 +12,8 @@ Cualquier sitio ──<script src="https://asistente-ia.faenabot.stream/embed.js
 Gestión (solo este Mac): http://localhost:5205
 ```
 
-Documentación de la solución (diagrama, servicios del servidor :5204 y operación): [docs/arquitectura.html](docs/arquitectura.html).
+Documentación de la solución (diagrama, servicios del servidor :5204, pruebas con curl y operación): [docs/arquitectura.html](docs/arquitectura.html).
+Probar los servicios: `./docs/probar-servicios.sh` (en el Mac) o `./docs/probar-servicios.sh --publico` (por el túnel); no crea solicitudes reales.
 
 ```
 publico/     Lo que publica Cloudflare (Worker con despliegue desde Git; directorio publico)
