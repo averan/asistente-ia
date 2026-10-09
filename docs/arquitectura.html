@@ -117,6 +117,17 @@
   .test h3 .exp { font: 500 12px/1 var(--mono); color: var(--muted); }
   .note { background: var(--mac-soft); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; font-size: 15px; }
   td.code { font: 500 14px var(--mono); white-space: nowrap; }
+  .stack { display: grid; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+  .layer { display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr); gap: 18px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .layer:last-child { border-bottom: 0; }
+  .layer h3 { font-size: 16px; }
+  .layer .where { display: block; margin-top: 4px; font: 12px/1.4 var(--mono); color: var(--muted); }
+  .tech { display: grid; gap: 7px; min-width: 0; }
+  .tech div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+  .tech b { font-weight: 600; }
+  .tech .ver { font: 12px var(--mono); color: var(--accent); }
+  .tech .role { color: var(--muted); font-size: 15px; }
+  @media (max-width: 560px) { .layer { grid-template-columns: minmax(0, 1fr); gap: 8px; } }
   footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
 </style>
 </head>
@@ -182,6 +193,80 @@
       <li><p><strong>Cuando el visitante pulsa «Enviar solicitud»</strong>, el widget llama a <code>POST /api/solicitudes</code>. El servidor valida los datos y los archivos, la guarda con su número (FAE, TCK o FBT) y aparece en la gestión.</p></li>
       <li><p><strong>Si el Mac o el túnel no están disponibles</strong>, el widget muestra el aviso propio del sitio con sus colores, porque <code>backend.js</code> guarda esa configuración pública.</p></li>
     </ol>
+  </section>
+
+  <section aria-labelledby="h-stack">
+    <h2 id="h-stack">Stack tecnológico</h2>
+    <p class="sub">Todo el código propio (unas 3.100 líneas entre widget, servidor, gestión y scripts) usa tecnologías estándar: JavaScript sin framework en el navegador y Python sin dependencias en el servidor. Lo que no es propio: los servicios de Cloudflare y GitHub, tres librerías del navegador para leer archivos y el modelo de IA, que corre en el mismo Mac.</p>
+    <div class="stack">
+      <div class="layer">
+        <h3>Widget<span class="where">navegador del visitante</span></h3>
+        <div class="tech">
+          <div><b>JavaScript</b><span class="ver">sin framework</span><span class="role">widget y <code>embed.js</code>, sin compilación ni dependencias</span></div>
+          <div><b>CSS con variables</b><span class="role">colores y estilo propios de cada sitio</span></div>
+          <div><b>fetch + ReadableStream</b><span class="role">muestra la respuesta a medida que llega (streaming SSE)</span></div>
+          <div><b>pdf.js</b><span class="ver">3.11.174</span><span class="role">lee PDF en el navegador</span></div>
+          <div><b>mammoth</b><span class="ver">1.6.0</span><span class="role">lee documentos Word (.docx)</span></div>
+          <div><b>SheetJS</b><span class="ver">0.18.5</span><span class="role">lee planillas Excel; estas tres librerías se cargan desde cdnjs solo si se adjunta un archivo</span></div>
+          <div><b>localStorage</b><span class="role">conserva la conversación al recargar la página</span></div>
+        </div>
+      </div>
+      <div class="layer">
+        <h3>Publicación<span class="where">internet</span></h3>
+        <div class="tech">
+          <div><b>Cloudflare Workers</b><span class="ver">static assets</span><span class="role">sirve el widget; se despliega solo con cada push a GitHub</span></div>
+          <div><b>Wrangler</b><span class="ver">4.149</span><span class="role">configuración del Worker y sus dominios (<code>wrangler.jsonc</code>)</span></div>
+          <div><b>Cloudflare DNS y Registrar</b><span class="role">dominio <code>faenabot.stream</code> y sus subdominios con HTTPS</span></div>
+          <div><b>GitHub</b><span class="role">código y <code>backend.js</code> con la dirección vigente del túnel</span></div>
+          <div><b>Vercel · Cloudflare Workers · GitHub Pages</b><span class="role">donde están publicados los sitios que integran el asistente</span></div>
+        </div>
+      </div>
+      <div class="layer">
+        <h3>Conexión<span class="where">internet → Mac</span></h3>
+        <div class="tech">
+          <div><b>cloudflared</b><span class="ver">2026.9.3</span><span class="role">túnel gratuito de Cloudflare (Quick Tunnel); el HTTPS lo pone Cloudflare y el Mac no abre puertos</span></div>
+        </div>
+      </div>
+      <div class="layer">
+        <h3>Servidor<span class="where">Mac · :5204 y :5205</span></h3>
+        <div class="tech">
+          <div><b>Python</b><span class="ver">3.9.6</span><span class="role">solo biblioteca estándar: <code>http.server</code>, <code>http.client</code>, <code>sqlite3</code>, <code>threading</code>; nada que instalar</span></div>
+          <div><b>API compatible con OpenAI</b><span class="role"><code>/v1/chat/completions</code> con streaming, igual que oMLX</span></div>
+          <div><b>Gestión</b><span class="role">HTML y JavaScript servidos por el mismo proceso, solo para el Mac</span></div>
+        </div>
+      </div>
+      <div class="layer">
+        <h3>Datos<span class="where">Mac</span></h3>
+        <div class="tech">
+          <div><b>SQLite</b><span class="ver">3.54</span><span class="role">un archivo con solicitudes, archivos adjuntos (con SHA-256) y notas</span></div>
+          <div><b>Markdown con encabezado</b><span class="role">un archivo por sitio (configuración y conocimiento) y reglas comunes por modo</span></div>
+          <div><b>.env</b><span class="role">clave de oMLX, puertos y límites; nunca se sube a GitHub</span></div>
+        </div>
+      </div>
+      <div class="layer">
+        <h3>Inteligencia artificial<span class="where">Mac · :8000</span></h3>
+        <div class="tech">
+          <div><b>oMLX</b><span class="role">servidor local de modelos para Apple silicon, con API compatible con OpenAI</span></div>
+          <div><b>Modelos MLX cuantizados</b><span class="ver">4 bits</span><span class="role">hoy <code>Qwen3.5-4B-MLX-4bit</code>; el asistente usa solo el modelo ya cargado</span></div>
+        </div>
+      </div>
+      <div class="layer">
+        <h3>Operación<span class="where">Mac</span></h3>
+        <div class="tech">
+          <div><b>bash</b><span class="role"><code>publicar.sh</code>, <code>servicio.sh</code> y <code>probar-servicios.sh</code></span></div>
+          <div><b>launchd</b><span class="role">servicio del Mac: arranque al iniciar sesión y reinicio automático</span></div>
+          <div><b>caffeinate</b><span class="role">evita que el Mac se duerma mientras el asistente está conectado</span></div>
+          <div><b>git + Llavero de macOS</b><span class="ver">2.54</span><span class="role">publica <code>backend.js</code> sin pedir contraseña</span></div>
+          <div><b>curl</b><span class="role">pruebas de los servicios</span></div>
+        </div>
+      </div>
+      <div class="layer">
+        <h3>Equipo<span class="where">hardware</span></h3>
+        <div class="tech">
+          <div><b>MacBook Air</b><span class="ver">Apple M5 · 24 GB</span><span class="role">memoria unificada compartida entre el sistema y el modelo; macOS 27.0.1</span></div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section aria-labelledby="h-servicios">

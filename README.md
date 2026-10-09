@@ -32,6 +32,18 @@ servidor/    Corre en el Mac; nunca se publica
   sitios/          un archivo por sitio (no se suben a GitHub, salvo las plantillas)
 ```
 
+## Stack
+
+| Capa | Tecnología |
+|---|---|
+| Widget (navegador) | JavaScript sin framework, CSS con variables, streaming con `fetch`; pdf.js, mammoth y SheetJS para leer archivos |
+| Publicación | Cloudflare Workers (static assets, despliegue desde GitHub, `wrangler.jsonc`), Cloudflare DNS/Registrar (`faenabot.stream`) |
+| Conexión | `cloudflared` (túnel gratuito de Cloudflare) |
+| Servidor | Python 3.9 solo con la biblioteca estándar; API compatible con OpenAI |
+| Datos | SQLite (solicitudes, archivos con SHA-256, notas); Markdown por sitio; `.env` |
+| IA | oMLX con modelos MLX cuantizados a 4 bits, en el mismo Mac (Apple silicon) |
+| Operación | bash, launchd, caffeinate, git, curl |
+
 ## Dos modos
 
 | Modo | Para qué | Numeración |
