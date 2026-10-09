@@ -6,25 +6,25 @@ personalidad, colores y modo de trabajo, configurados en el servidor.
 
 ```
 Cualquier sitio ──<script src="https://asistente-ia.faenabot.stream/embed.js">──► Cloudflare Workers (widget)
-      └── chat / solicitudes (CORS) ──► túnel ──► servidor del Mac (:5204) ──► oMLX
+      └── chat / solicitudes (CORS) ──► túnel fijo (api.faenabot.stream) ──► servidor del Mac (:5204) ──► oMLX
                                                    ├─ sitios/<dominio>.md  (configuración + contexto de cada sitio)
                                                    └─ datos/asistente.db   (solicitudes de todos los sitios)
-Gestión (solo este Mac): http://localhost:5205
+Gestión: http://localhost:5205 en el Mac · https://gestion.faenabot.stream desde internet (Cloudflare Access)
 ```
 
 Documentación de la solución (diagrama, servicios del servidor :5204, pruebas con curl y operación): [docs/arquitectura.html](docs/arquitectura.html).
-Probar los servicios: `./docs/probar-servicios.sh` (en el Mac) o `./docs/probar-servicios.sh --publico` (por el túnel); no crea solicitudes reales.
+Probar los servicios: `./docs/probar-servicios.sh` (en el Mac) o `./docs/probar-servicios.sh --publico` (por api.faenabot.stream); no crea solicitudes reales.
 
 ```
 publico/     Lo que publica Cloudflare (Worker con despliegue desde Git; directorio publico)
   embed.js       la línea que se pega en cada sitio
   asistente.js   widget de chat (adjuntos, solicitudes, modo «no disponible»)
   asistente.css  estilos; los colores de cada sitio llegan desde el servidor
-  backend.js     dirección del túnel + configuración visible de los sitios (la genera publicar.sh)
+  backend.js     dirección del servidor + configuración visible de los sitios (la genera publicar.sh)
 servidor/    Corre en el Mac; nunca se publica
   server.py        servidor del asistente (CORS, prompt en el servidor, límites, archivos)
   solicitudes.py   base de datos (tickets y contactos, archivos con SHA-256, notas)
-  gestion.py/.html página de gestión local con visor de archivos
+  gestion.py/.html página de gestión (Mac, o internet con Cloudflare Access) con visor de archivos
   publicar.sh      conecta el asistente: servidor + túnel + backend.js (vigila el túnel)
   servicio.sh      lo deja como servicio del Mac (launchd): arranque automático y reinicio
   importar.py      importa los datos de los proyectos anteriores (se usó una vez)
@@ -38,7 +38,7 @@ servidor/    Corre en el Mac; nunca se publica
 |---|---|
 | Widget (navegador) | JavaScript sin framework, CSS con variables, streaming con `fetch`; pdf.js, mammoth y SheetJS para leer archivos |
 | Publicación | Cloudflare Workers (static assets, despliegue desde GitHub, `wrangler.jsonc`), Cloudflare DNS/Registrar (`faenabot.stream`) |
-| Conexión | `cloudflared` (túnel gratuito de Cloudflare) |
+| Conexión | `cloudflared`: túnel fijo con nombre (`api.` y `gestion.faenabot.stream`); Cloudflare Access para la gestión |
 | Servidor | Python 3.9 solo con la biblioteca estándar; API compatible con OpenAI |
 | Datos | SQLite (solicitudes, archivos con SHA-256, notas); Markdown por sitio; `.env` |
 | IA | oMLX con modelos MLX cuantizados a 4 bits, en el mismo Mac (Apple silicon) |
@@ -73,13 +73,13 @@ visibles solo en esa página, y `<button onclick="asistenteIA.open()">` abre el 
 ## Conectar el asistente
 
 Como **servicio del Mac** (recomendado): arranca solo al iniciar sesión, sigue funcionando aunque se cierre la
-terminal o la app, y se reinicia solo si falla o si el túnel de Cloudflare expira (lo revisa cada minuto).
+terminal o la app, y se reinicia solo si el servidor o el túnel dejan de responder (lo revisa cada minuto).
 
 ```bash
 ./servidor/servicio.sh instalar      # una sola vez
 ./servidor/servicio.sh estado        # ¿está corriendo? ¿qué túnel usa?
 ./servidor/servicio.sh log           # consultas recibidas y avisos (Ctrl+C para salir del registro)
-./servidor/servicio.sh reiniciar     # túnel nuevo
+./servidor/servicio.sh reiniciar     # vuelve a conectar el servidor y el túnel
 ./servidor/servicio.sh detener       # lo pausa (los sitios muestran «no disponible») hasta «iniciar» o el próximo inicio de sesión
 ./servidor/servicio.sh iniciar       # lo vuelve a encender
 ./servidor/servicio.sh desinstalar   # lo detiene y deja de arrancar al iniciar sesión
@@ -87,12 +87,15 @@ terminal o la app, y se reinicia solo si falla o si el túnel de Cloudflare expi
 
 O a mano, en una terminal: `./servidor/publicar.sh` (Ctrl+C para desconectarlo).
 
-En ambos casos arranca el servidor y el túnel, y sube `publico/backend.js` con la nueva dirección → Cloudflare se
-actualiza solo (~1 min). Al detenerse, todos los sitios muestran su aviso de «no disponible» (con su nombre y colores,
-que `backend.js` guarda aunque el Mac esté apagado). Requisitos: oMLX en marcha con el modelo cargado.
+En ambos casos arranca el servidor y el túnel. Con el **túnel fijo** (`TUNEL_CONFIG` en `servidor/.env`, ver
+`.env.example`) la dirección es siempre `https://api.faenabot.stream`, y `publico/backend.js` solo se vuelve a subir
+si cambia la configuración visible de algún sitio. Sin túnel fijo usa uno gratuito (trycloudflare), cuya dirección
+cambia en cada arranque y se publica en `backend.js`. Cuando el Mac no está disponible, todos los sitios muestran su
+aviso «no disponible» (con su nombre y colores, que `backend.js` guarda). Requisitos: oMLX en marcha con el modelo cargado.
 
-**Gestión:** http://localhost:5205 (solo este Mac) — tickets y contactos de todos los sitios, filtros por sitio, modo y
-estado, detalle con la conversación, visor de archivos, cambio de estado y notas. También:
+**Gestión:** http://localhost:5205 en el Mac, o https://gestion.faenabot.stream desde internet (solo los correos
+autorizados en Cloudflare Access, con un código que llega al correo) — tickets y contactos de todos los sitios,
+filtros por sitio, modo y estado, detalle con la conversación, visor de archivos, cambio de estado y notas. También:
 `python3 servidor/solicitudes.py listar` y `python3 servidor/solicitudes.py ver TCK-0017`.
 
 ## Seguridad
@@ -103,4 +106,7 @@ estado, detalle con la conversación, visor de archivos, cambio de estado y nota
 - Límites de mensajes y solicitudes por visitante, de generaciones simultáneas y de tokens; solo se usa el modelo ya
   cargado en oMLX; el chat no puede usar herramientas.
 - Archivos: se verifica el tipo real por su contenido; en la gestión solo las imágenes se muestran directamente.
-- La gestión solo acepta conexiones desde este Mac y exige una cabecera propia para los cambios.
+- La gestión acepta conexiones desde este Mac o, desde internet, solo con una sesión de Cloudflare Access: el servidor
+  verifica en cada petición la firma del acceso (RS256, audiencia, emisor y vigencia) y sin `ACCESS_TEAM`/`ACCESS_AUD`
+  el acceso remoto queda cerrado. Los cambios hechos desde internet quedan firmados con el correo de quien los hizo,
+  y todos exigen una cabecera propia (CSRF).

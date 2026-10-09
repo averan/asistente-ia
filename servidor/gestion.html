@@ -126,7 +126,7 @@ h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: v
 <header>
   <div class="bar">
     <span class="logo" aria-hidden="true">💬</span>
-    <div><h1>Solicitudes del asistente</h1><div class="sub">Tickets y contactos de todos los sitios · solo este Mac</div></div>
+    <div><h1>Solicitudes del asistente</h1><div class="sub" id="sub">Tickets y contactos de todos los sitios</div></div>
     <div class="right"><span id="updated"></span><button class="ghost" id="refresh">Actualizar</button></div>
   </div>
 </header>
@@ -432,6 +432,7 @@ document.addEventListener('keydown', e => {
 });
 load();
 setInterval(() => { if (!document.hidden) load(); }, 15000);
+api('/api/yo').then(d => { $('#sub').textContent = 'Tickets y contactos de todos los sitios · ' + (d.remoto ? 'conectado como ' + d.usuario : 'en este Mac'); }).catch(() => {});
 </script>
 </body>
 </html>

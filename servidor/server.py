@@ -615,10 +615,12 @@ def main():
         if os.path.isdir(SITES_DIR) else []
     print(f'Sitios autorizados (sitios/): {", ".join(sites) or "ninguno"}', flush=True)
     if ADMIN_PORT:
-        import gestion  # página de gestión: puerto aparte, nunca publicado por el túnel
+        import gestion  # página de gestión: puerto aparte; desde internet solo con Cloudflare Access
+        gestion.configure_access(ENV.get('ACCESS_TEAM'), ENV.get('ACCESS_AUD'), ENV.get('GESTION_HOST', 'gestion.faenabot.stream'))
         try:
             gestion.start(ADMIN_PORT)
-            print(f'Gestión de solicitudes en http://localhost:{ADMIN_PORT}  (solo desde este Mac)', flush=True)
+            remoto = f'  y https://{gestion.ACCESS["host"]} (Cloudflare Access)' if gestion.ACCESS['team'] and gestion.ACCESS['aud'] else '  (solo desde este Mac)'
+            print(f'Gestión de solicitudes en http://localhost:{ADMIN_PORT}{remoto}', flush=True)
         except OSError:
             print(f'Aviso: el puerto {ADMIN_PORT} está ocupado; la página de gestión no se inició.', flush=True)
     try:

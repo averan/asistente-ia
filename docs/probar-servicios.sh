@@ -11,7 +11,7 @@ set -uo pipefail
 ORIGEN=${ORIGEN:-https://faenabot.stream}
 WIDGET=https://asistente-ia.faenabot.stream
 if [ "${1:-}" = "--publico" ]; then
-  BASE=$(curl -s -m 10 "$WIDGET/backend.js?t=$(date +%s)" | grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' | head -1)
+  BASE=$(curl -s -m 10 "$WIDGET/backend.js?t=$(date +%s)" | grep -oE 'ASISTENTE_BACKEND *= *"https://[^"]+' | grep -oE 'https://.+' | head -1)
   [ -n "$BASE" ] || { echo "El asistente no está publicado (backend.js sin dirección): ¿está corriendo el servicio?"; exit 1; }
 fi
 BASE=${BASE:-http://localhost:5204}

@@ -48,7 +48,7 @@ desinstalar() {
 
 detener() {
   instalado || { echo "El asistente ya está detenido."; return; }
-  echo "Deteniendo (publica el aviso «no disponible»)…"
+  echo "Deteniendo (los sitios mostrarán «no disponible»)…"
   launchctl bootout "$DOMINIO/$LABEL"   # los sitios muestran «no disponible»
   for _ in $(seq 1 60); do instalado || break; sleep 1; done
   echo "Asistente detenido. Vuelve a arrancar con  ./servidor/servicio.sh iniciar  o al iniciar sesión."
@@ -57,7 +57,7 @@ detener() {
 iniciar() {
   [ -f "$PLIST" ] || { echo "El servicio no está instalado (./servidor/servicio.sh instalar)."; exit 1; }
   instalado && { echo "El asistente ya está corriendo."; return; }
-  launchctl bootstrap "$DOMINIO" "$PLIST" && echo "Asistente iniciado: abre un túnel nuevo y en ~1 min responde en los sitios."
+  launchctl bootstrap "$DOMINIO" "$PLIST" && echo "Asistente iniciado: en unos segundos responde en los sitios (hasta ~1 min con túnel gratuito)."
 }
 
 case "${1:-estado}" in
@@ -65,13 +65,13 @@ case "${1:-estado}" in
   detener)     detener ;;
   iniciar)     iniciar ;;
   desinstalar) desinstalar ;;
-  reiniciar)   if instalado; then launchctl kill SIGTERM "$DOMINIO/$LABEL" && echo "Reiniciando (abre un túnel nuevo en ~1 min)…"
+  reiniciar)   if instalado; then launchctl kill SIGTERM "$DOMINIO/$LABEL" && echo "Reiniciando: vuelve a conectar el servidor y el túnel…"
                else echo "El asistente está detenido: usa  ./servidor/servicio.sh iniciar"; fi ;;
   log)         tail -n 40 -f "$LOG" ;;
   estado)
     if instalado; then
       launchctl print "$DOMINIO/$LABEL" | awk -F' = ' '/^\t(state|pid|runs|last exit code) = /{sub(/^\t/,"",$1); print "  " $1 ": " $2}'
-      grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$LOG" 2>/dev/null | tail -1 | sed 's/^/  túnel: /'
+      sed -n 's/^Túnel: //p' "$LOG" 2>/dev/null | tail -1 | sed 's/^/  túnel: /'
       true
     elif [ -f "$PLIST" ]; then
       echo "  state: detenido (arranca con  ./servidor/servicio.sh iniciar  o al iniciar sesión)"

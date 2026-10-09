@@ -158,8 +158,8 @@
         <rect class="group" x="30" y="136" width="420" height="104" rx="10"/>
         <text class="gl" x="44" y="154">CLOUDFLARE · INTERNET</text>
         <g><rect class="box c" x="44" y="164" width="230" height="60" rx="6"/><text class="tt" x="159" y="189" text-anchor="middle">Widget del asistente</text><text class="tm" x="159" y="208" text-anchor="middle">asistente-ia.faenabot.stream</text></g>
-        <g><rect class="box c" x="290" y="164" width="146" height="60" rx="6"/><text class="tt" x="363" y="189" text-anchor="middle">Túnel</text><text class="tm" x="363" y="208" text-anchor="middle">trycloudflare.com</text></g>
-        <g><rect class="box n" x="480" y="164" width="160" height="60" rx="6"/><text class="tt" x="560" y="189" text-anchor="middle">GitHub</text><text class="ts" x="560" y="208" text-anchor="middle">dirección del túnel</text></g>
+        <g><rect class="box c" x="290" y="164" width="146" height="60" rx="6"/><text class="tt" x="363" y="189" text-anchor="middle">Túnel fijo</text><text class="tm" x="363" y="208" text-anchor="middle">api · gestion</text></g>
+        <g><rect class="box n" x="480" y="164" width="160" height="60" rx="6"/><text class="tt" x="560" y="189" text-anchor="middle">GitHub</text><text class="ts" x="560" y="208" text-anchor="middle">widget y backend.js</text></g>
         <line class="wire" x1="480" y1="194" x2="453" y2="194" marker-end="url(#ah)"/>
         <line class="wire" x1="363" y1="224" x2="363" y2="307" marker-end="url(#ah)"/>
         <line class="wire" x1="565" y1="310" x2="565" y2="227" marker-end="url(#ah)"/>
@@ -171,7 +171,7 @@
         <line class="wire" x1="230" y1="340" x2="197" y2="340" marker-end="url(#ah)"/>
         <g><rect class="box m" x="58" y="400" width="170" height="60" rx="6"/><text class="tt" x="143" y="425" text-anchor="middle">Config. por sitio</text><text class="tm" x="143" y="444" text-anchor="middle">sitios/&lt;dominio&gt;.md</text></g>
         <g><rect class="box m" x="250" y="400" width="160" height="60" rx="6"/><text class="tt" x="330" y="425" text-anchor="middle">Base de datos</text><text class="ts" x="330" y="444" text-anchor="middle">tickets y contactos</text></g>
-        <g><rect class="box m" x="440" y="400" width="150" height="60" rx="6"/><text class="tt" x="515" y="425" text-anchor="middle">Gestión :5205</text><text class="ts" x="515" y="444" text-anchor="middle">solo este Mac</text></g>
+        <g><rect class="box m" x="440" y="400" width="150" height="60" rx="6"/><text class="tt" x="515" y="425" text-anchor="middle">Gestión :5205</text><text class="ts" x="515" y="444" text-anchor="middle">Mac o Access</text></g>
         <line class="wire" x1="330" y1="370" x2="330" y2="397" marker-end="url(#ah)"/>
         <path class="wire" d="M260 370V385H143V397" marker-end="url(#ah)"/>
         <line class="wire" x1="440" y1="430" x2="413" y2="430" marker-end="url(#ah)"/>
@@ -187,7 +187,7 @@
   <section aria-labelledby="h-flujo">
     <h2 id="h-flujo">Recorrido de una conversación</h2>
     <ol class="flow">
-      <li><p><strong>El visitante abre un sitio</strong> que tiene la línea del asistente. El navegador descarga el widget desde Cloudflare, junto con <code>backend.js</code>, que trae la dirección vigente del túnel.</p></li>
+      <li><p><strong>El visitante abre un sitio</strong> que tiene la línea del asistente. El navegador descarga el widget desde Cloudflare, junto con <code>backend.js</code>, que trae la dirección del servidor (<code>api.faenabot.stream</code>) y la configuración pública de cada sitio.</p></li>
       <li><p><strong>El widget pide la configuración de su sitio</strong> a <code>GET /api/config</code>: nombre, saludo, colores y si registra contactos o tickets. Un sitio sin archivo en <code>sitios/</code> recibe 403 y el widget no aparece.</p></li>
       <li><p><strong>Cada mensaje va a <code>POST /v1/chat/completions</code></strong>. El servidor antepone las instrucciones del sitio, aplica los límites y reenvía la conversación a oMLX; la respuesta vuelve palabra por palabra.</p></li>
       <li><p><strong>Cuando el visitante pulsa «Enviar solicitud»</strong>, el widget llama a <code>POST /api/solicitudes</code>. El servidor valida los datos y los archivos, la guarda con su número (FAE, TCK o FBT) y aparece en la gestión.</p></li>
@@ -224,7 +224,8 @@
       <div class="layer">
         <h3>Conexión<span class="where">internet → Mac</span></h3>
         <div class="tech">
-          <div><b>cloudflared</b><span class="ver">2026.9.3</span><span class="role">túnel gratuito de Cloudflare (Quick Tunnel); el HTTPS lo pone Cloudflare y el Mac no abre puertos</span></div>
+          <div><b>cloudflared</b><span class="ver">2026.9.3</span><span class="role">túnel fijo con nombre (<code>faenabot</code>): <code>api.faenabot.stream</code> → :5204 y <code>gestion.faenabot.stream</code> → :5205. El HTTPS lo pone Cloudflare y el Mac no abre puertos</span></div>
+          <div><b>Cloudflare Access</b><span class="ver">Zero Trust Free</span><span class="role">inicio de sesión con código por correo para la gestión; solo los correos autorizados</span></div>
         </div>
       </div>
       <div class="layer">
@@ -329,7 +330,7 @@
       </div>
       <div class="panel">
         <h3>Gestión :5205</h3>
-        <p>Página aparte, que arranca el mismo servidor y no pasa por el túnel. Acepta conexiones solo desde el Mac: lista, filtros, conversación, archivos, estado y notas.</p>
+        <p>Página aparte que arranca el mismo servidor: lista, filtros, conversación, archivos, estado y notas. En el Mac, en <code>localhost:5205</code>. Desde internet, en <code>gestion.faenabot.stream</code>, solo para los correos autorizados en Cloudflare Access, con un código que llega al correo. El servidor verifica la firma de ese acceso en cada petición y firma cada cambio con el correo de quien lo hace.</p>
       </div>
     </div>
   </section>
@@ -363,13 +364,13 @@
     <h2 id="h-probar">Probar los servicios con curl</h2>
     <p class="sub">La forma rápida es el script del repositorio, que ejecuta las 12 pruebas y marca cada una con ✓ o ✗. Ninguna crea solicitudes reales.</p>
     <pre>./docs/probar-servicios.sh             # en el Mac (localhost:5204)
-./docs/probar-servicios.sh --publico   # desde cualquier equipo, por el túnel vigente</pre>
+./docs/probar-servicios.sh --publico   # desde cualquier equipo, por api.faenabot.stream</pre>
     <p class="sub">Para probar a mano, primero define el servidor y un sitio autorizado:</p>
     <pre>BASE=http://localhost:5204        # en el Mac
 ORIGEN=https://faenabot.stream    # cualquier sitio con archivo en sitios/
 
-# Desde fuera del Mac, usa la dirección vigente del túnel:
-BASE=$(curl -s https://asistente-ia.faenabot.stream/backend.js | grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com')</pre>
+# Desde fuera del Mac, por el túnel fijo:
+BASE=https://api.faenabot.stream</pre>
     <div class="tests">
       <div class="test">
         <h3>Estado y modelo cargado <span class="exp">200</span></h3>
@@ -423,7 +424,7 @@ curl -s $BASE/api/solicitudes -H "Origin: $ORIGEN" -H "Content-Type: application
           <tr><td class="code">413</td><td>Mensaje o archivos demasiado grandes.</td></tr>
           <tr><td class="code">429</td><td>Demasiados mensajes o solicitudes seguidas del mismo visitante.</td></tr>
           <tr><td class="code">502 · 503</td><td>oMLX no responde, o ya hay 2 respuestas en curso.</td></tr>
-          <tr><td class="code">530</td><td>Lo devuelve Cloudflare: el túnel no llega al Mac (servicio detenido o túnel vencido).</td></tr>
+          <tr><td class="code">530</td><td>Lo devuelve Cloudflare: el túnel no llega al Mac (servicio detenido o Mac sin conexión).</td></tr>
         </tbody>
       </table>
     </div>
@@ -431,13 +432,13 @@ curl -s $BASE/api/solicitudes -H "Origin: $ORIGEN" -H "Content-Type: application
 
   <section aria-labelledby="h-operacion">
     <h2 id="h-operacion">Operación en el Mac</h2>
-    <p class="sub"><code>publicar.sh</code> corre como servicio del Mac: arranca al iniciar sesión, abre el túnel y publica su dirección. Cada minuto revisa el servidor y el túnel; si el túnel deja de responder 3 veces seguidas, el servicio se reinicia con uno nuevo.</p>
+    <p class="sub"><code>publicar.sh</code> corre como servicio del Mac: arranca al iniciar sesión y conecta el túnel fijo. Cada minuto revisa el servidor y el túnel; si algo deja de responder 3 veces seguidas, el servicio lo vuelve a conectar. Como la dirección no cambia, no publica nada nuevo al arrancar o detenerse: si el Mac no está disponible, cada sitio muestra su aviso «no disponible».</p>
     <div class="cmds">
       <div class="cmd"><code>servicio.sh estado</code><span>Si está corriendo y qué túnel usa</span></div>
       <div class="cmd"><code>servicio.sh log</code><span>Conversaciones y solicitudes en vivo</span></div>
       <div class="cmd"><code>servicio.sh detener</code><span>Lo pausa; los sitios muestran «no disponible»</span></div>
-      <div class="cmd"><code>servicio.sh iniciar</code><span>Lo vuelve a encender (túnel nuevo en ~1 min)</span></div>
-      <div class="cmd"><code>servicio.sh reiniciar</code><span>Fuerza un túnel nuevo</span></div>
+      <div class="cmd"><code>servicio.sh iniciar</code><span>Lo vuelve a encender (responde en segundos)</span></div>
+      <div class="cmd"><code>servicio.sh reiniciar</code><span>Vuelve a conectar el servidor y el túnel</span></div>
       <div class="cmd"><code>servicio.sh desinstalar</code><span>Lo quita del inicio de sesión</span></div>
     </div>
   </section>

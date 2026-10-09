@@ -169,8 +169,8 @@ def leer_adjunto(db, adjunto_id):
     return (row['nombre'], row['tipo'], bytes(row['datos'])) if row else None
 
 
-def actualizar(db, sid, estado=None, nota=None):
-    """Cambia el estado y/o agrega una nota. Cada cambio queda en el historial."""
+def actualizar(db, sid, estado=None, nota=None, autor=''):
+    """Cambia el estado y/o agrega una nota. Cada cambio queda en el historial (con su autor si viene de internet)."""
     actual = obtener(db, sid)
     nota = (nota or '').strip()[:2000]
     if estado and estado not in ESTADOS:
@@ -178,14 +178,15 @@ def actualizar(db, sid, estado=None, nota=None):
     if not (estado and estado != actual['estado']) and not nota:
         raise Error('Cambia el estado o escribe una nota.')
     fecha = ahora()
+    firma = f' — {autor}' if autor else ''
     db.execute('BEGIN IMMEDIATE')
     try:
         if estado and estado != actual['estado']:
             db.execute('UPDATE solicitudes SET estado = ?, actualizado = ? WHERE id = ?', (estado, fecha, actual['id']))
             db.execute('INSERT INTO notas (solicitud_id, fecha, texto) VALUES (?, ?, ?)',
-                       (actual['id'], fecha, f'Estado: {ESTADOS.get(actual["estado"], actual["estado"])} → {ESTADOS[estado]}'))
+                       (actual['id'], fecha, f'Estado: {ESTADOS.get(actual["estado"], actual["estado"])} → {ESTADOS[estado]}' + firma))
         if nota:
-            db.execute('INSERT INTO notas (solicitud_id, fecha, texto) VALUES (?, ?, ?)', (actual['id'], fecha, nota))
+            db.execute('INSERT INTO notas (solicitud_id, fecha, texto) VALUES (?, ?, ?)', (actual['id'], fecha, nota + firma))
             db.execute('UPDATE solicitudes SET actualizado = ? WHERE id = ?', (fecha, actual['id']))
         db.execute('COMMIT')
     except Exception:
