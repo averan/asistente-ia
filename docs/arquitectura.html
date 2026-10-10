@@ -145,40 +145,45 @@
     <div class="figure">
       <svg viewBox="0 0 680 520" role="img" aria-labelledby="d-t d-d">
         <title id="d-t">Diagrama de la solución</title>
-        <desc id="d-d">Cinco sitios cargan el widget desde Cloudflare y conversan por un túnel con el servidor del Mac, que usa oMLX, la configuración por sitio y la base de datos. publicar.sh publica la dirección del túnel en GitHub, desde donde Cloudflare despliega el widget.</desc>
+        <desc id="d-d">Cinco sitios cargan el widget desde Cloudflare y conversan por el túnel fijo (api.faenabot.stream) con el servidor del Mac, que usa oMLX, la configuración por sitio y la base de datos. El equipo entra a la gestión (gestion.faenabot.stream) pasando por Cloudflare Access y el mismo túnel. publicar.sh publica backend.js en GitHub, desde donde Cloudflare despliega el widget.</desc>
         <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
-        <g><rect class="box n" x="40" y="40" width="108" height="56" rx="6"/><text class="tt" x="94" y="64" text-anchor="middle">Faena</text><text class="ts" x="94" y="82" text-anchor="middle">Vercel</text></g>
-        <g><rect class="box n" x="163" y="40" width="108" height="56" rx="6"/><text class="tt" x="217" y="64" text-anchor="middle">IA Local</text><text class="ts" x="217" y="82" text-anchor="middle">Cloudflare</text></g>
-        <g><rect class="box n" x="286" y="40" width="108" height="56" rx="6"/><text class="tt" x="340" y="64" text-anchor="middle">minimoweb</text><text class="ts" x="340" y="82" text-anchor="middle">GitHub Pages</text></g>
-        <g><rect class="box n" x="409" y="40" width="108" height="56" rx="6"/><text class="tt" x="463" y="64" text-anchor="middle">Wodobox</text><text class="ts" x="463" y="82" text-anchor="middle">Mesa de ayuda</text></g>
-        <g><rect class="box n" x="532" y="40" width="108" height="56" rx="6"/><text class="tt" x="586" y="64" text-anchor="middle">FaenaBot</text><text class="ts" x="586" y="82" text-anchor="middle">Demo</text></g>
-        <path class="wire" d="M94 96V112M217 96V112M340 96V112M463 96V112M586 96V112M94 112H586"/>
-        <line class="wire" x1="159" y1="112" x2="159" y2="161" marker-end="url(#ah)"/>
-        <line class="wire" x1="363" y1="112" x2="363" y2="161" marker-end="url(#ah)"/>
-        <rect class="group" x="30" y="136" width="420" height="104" rx="10"/>
-        <text class="gl" x="44" y="154">CLOUDFLARE · INTERNET</text>
-        <g><rect class="box c" x="44" y="164" width="230" height="60" rx="6"/><text class="tt" x="159" y="189" text-anchor="middle">Widget del asistente</text><text class="tm" x="159" y="208" text-anchor="middle">asistente-ia.faenabot.stream</text></g>
-        <g><rect class="box c" x="290" y="164" width="146" height="60" rx="6"/><text class="tt" x="363" y="189" text-anchor="middle">Túnel fijo</text><text class="tm" x="363" y="208" text-anchor="middle">api · gestion</text></g>
-        <g><rect class="box n" x="480" y="164" width="160" height="60" rx="6"/><text class="tt" x="560" y="189" text-anchor="middle">GitHub</text><text class="ts" x="560" y="208" text-anchor="middle">widget y backend.js</text></g>
-        <line class="wire" x1="480" y1="194" x2="453" y2="194" marker-end="url(#ah)"/>
-        <line class="wire" x1="363" y1="224" x2="363" y2="307" marker-end="url(#ah)"/>
-        <line class="wire" x1="565" y1="310" x2="565" y2="227" marker-end="url(#ah)"/>
-        <rect class="group" x="30" y="280" width="620" height="200" rx="10"/>
-        <text class="gl" x="44" y="298">MAC · SERVICIO LAUNCHD</text>
-        <g><rect class="box m" x="44" y="310" width="150" height="60" rx="6"/><text class="tt" x="119" y="335" text-anchor="middle">oMLX :8000</text><text class="ts" x="119" y="354" text-anchor="middle">modelo de IA local</text></g>
-        <g><rect class="box m" x="230" y="310" width="180" height="60" rx="6"/><text class="tt" x="320" y="335" text-anchor="middle">Servidor :5204</text><text class="ts" x="320" y="354" text-anchor="middle">CORS, prompt, límites</text></g>
-        <g><rect class="box n" x="490" y="310" width="150" height="60" rx="6"/><text class="tt" x="565" y="335" text-anchor="middle">publicar.sh</text><text class="ts" x="565" y="354" text-anchor="middle">túnel + vigilancia</text></g>
-        <line class="wire" x1="230" y1="340" x2="197" y2="340" marker-end="url(#ah)"/>
-        <g><rect class="box m" x="58" y="400" width="170" height="60" rx="6"/><text class="tt" x="143" y="425" text-anchor="middle">Config. por sitio</text><text class="tm" x="143" y="444" text-anchor="middle">sitios/&lt;dominio&gt;.md</text></g>
-        <g><rect class="box m" x="250" y="400" width="160" height="60" rx="6"/><text class="tt" x="330" y="425" text-anchor="middle">Base de datos</text><text class="ts" x="330" y="444" text-anchor="middle">tickets y contactos</text></g>
-        <g><rect class="box m" x="440" y="400" width="150" height="60" rx="6"/><text class="tt" x="515" y="425" text-anchor="middle">Gestión :5205</text><text class="ts" x="515" y="444" text-anchor="middle">Mac o Access</text></g>
-        <line class="wire" x1="330" y1="370" x2="330" y2="397" marker-end="url(#ah)"/>
-        <path class="wire" d="M260 370V385H143V397" marker-end="url(#ah)"/>
-        <line class="wire" x1="440" y1="430" x2="413" y2="430" marker-end="url(#ah)"/>
+        <g><rect class="box n" x="30" y="40" width="96" height="56" rx="6"/><text class="tt" x="78" y="64" text-anchor="middle">Faena</text><text class="ts" x="78" y="82" text-anchor="middle">Vercel</text></g>
+        <g><rect class="box n" x="136" y="40" width="96" height="56" rx="6"/><text class="tt" x="184" y="64" text-anchor="middle">IA Local</text><text class="ts" x="184" y="82" text-anchor="middle">Cloudflare</text></g>
+        <g><rect class="box n" x="242" y="40" width="96" height="56" rx="6"/><text class="tt" x="290" y="64" text-anchor="middle">minimoweb</text><text class="ts" x="290" y="82" text-anchor="middle">GitHub Pages</text></g>
+        <g><rect class="box n" x="348" y="40" width="96" height="56" rx="6"/><text class="tt" x="396" y="64" text-anchor="middle">Wodobox</text><text class="ts" x="396" y="82" text-anchor="middle">Tickets</text></g>
+        <g><rect class="box n" x="454" y="40" width="96" height="56" rx="6"/><text class="tt" x="502" y="64" text-anchor="middle">FaenaBot</text><text class="ts" x="502" y="82" text-anchor="middle">Demo</text></g>
+        <g><rect class="box n" x="566" y="40" width="84" height="56" rx="6"/><text class="tt" x="608" y="64" text-anchor="middle">Equipo</text><text class="ts" x="608" y="82" text-anchor="middle">gestión</text></g>
+        <path class="wire" d="M78 96V112M184 96V112M290 96V112M396 96V112M502 96V112M78 112H502"/>
+        <line class="wire" x1="139" y1="112" x2="139" y2="161" marker-end="url(#ah)"/>
+        <line class="wire" x1="325" y1="112" x2="325" y2="161" marker-end="url(#ah)"/>
+        <path class="wire" d="M608 96V128H471V161" marker-end="url(#ah)"/>
+        <rect class="group" x="20" y="136" width="530" height="104" rx="10"/>
+        <text class="gl" x="34" y="153">CLOUDFLARE · INTERNET</text>
+        <g><rect class="box c" x="34" y="164" width="210" height="60" rx="6"/><text class="tt" x="139" y="189" text-anchor="middle">Widget del asistente</text><text class="tm" x="139" y="208" text-anchor="middle">asistente-ia.faenabot.stream</text></g>
+        <g><rect class="box c" x="260" y="164" width="130" height="60" rx="6"/><text class="tt" x="325" y="189" text-anchor="middle">Túnel fijo</text><text class="tm" x="325" y="208" text-anchor="middle">api · gestion</text></g>
+        <g><rect class="box c" x="406" y="164" width="130" height="60" rx="6"/><text class="tt" x="471" y="189" text-anchor="middle">Access</text><text class="ts" x="471" y="208" text-anchor="middle">correo + código</text></g>
+        <line class="wire" x1="406" y1="194" x2="393" y2="194" marker-end="url(#ah)"/>
+        <g><rect class="box n" x="566" y="164" width="84" height="60" rx="6"/><text class="tt" x="608" y="189" text-anchor="middle">GitHub</text><text class="ts" x="608" y="208" text-anchor="middle">backend.js</text></g>
+        <line class="wire" x1="566" y1="194" x2="553" y2="194" marker-end="url(#ah)"/>
+        <line class="wire" x1="300" y1="224" x2="300" y2="317" marker-end="url(#ah)"/>
+        <path class="wire" d="M370 224V268H475V317" marker-end="url(#ah)"/>
+        <rect class="group" x="20" y="290" width="640" height="200" rx="10"/>
+        <text class="gl" x="34" y="308">MAC · SERVICIO LAUNCHD</text>
+        <g><rect class="box m" x="34" y="320" width="150" height="60" rx="6"/><text class="tt" x="109" y="345" text-anchor="middle">oMLX :8000</text><text class="ts" x="109" y="364" text-anchor="middle">modelo de IA local</text></g>
+        <g><rect class="box m" x="210" y="320" width="170" height="60" rx="6"/><text class="tt" x="295" y="345" text-anchor="middle">Servidor :5204</text><text class="ts" x="295" y="364" text-anchor="middle">CORS, prompt, límites</text></g>
+        <g><rect class="box m" x="400" y="320" width="150" height="60" rx="6"/><text class="tt" x="475" y="345" text-anchor="middle">Gestión :5205</text><text class="ts" x="475" y="364" text-anchor="middle">Mac o Access</text></g>
+        <line class="wire" x1="210" y1="350" x2="187" y2="350" marker-end="url(#ah)"/>
+        <g><rect class="box m" x="34" y="410" width="170" height="60" rx="6"/><text class="tt" x="119" y="435" text-anchor="middle">Config. por sitio</text><text class="tm" x="119" y="454" text-anchor="middle">sitios/&lt;dominio&gt;.md</text></g>
+        <g><rect class="box m" x="230" y="410" width="160" height="60" rx="6"/><text class="tt" x="310" y="435" text-anchor="middle">Base de datos</text><text class="ts" x="310" y="454" text-anchor="middle">tickets y contactos</text></g>
+        <g><rect class="box n" x="470" y="410" width="150" height="60" rx="6"/><text class="tt" x="545" y="435" text-anchor="middle">publicar.sh</text><text class="ts" x="545" y="454" text-anchor="middle">túnel + vigilancia</text></g>
+        <line class="wire" x1="310" y1="380" x2="310" y2="407" marker-end="url(#ah)"/>
+        <path class="wire" d="M240 380V395H119V407" marker-end="url(#ah)"/>
+        <path class="wire" d="M430 380V440H393" marker-end="url(#ah)"/>
+        <line class="wire" x1="600" y1="410" x2="600" y2="227" marker-end="url(#ah)"/>
       </svg>
     </div>
     <div class="legend" aria-hidden="true">
-      <span><i class="sw n"></i>Sitios y publicación</span>
+      <span><i class="sw n"></i>Sitios, equipo y publicación</span>
       <span><i class="sw c"></i>Internet (Cloudflare)</span>
       <span><i class="sw m"></i>Solo en el Mac</span>
     </div>
