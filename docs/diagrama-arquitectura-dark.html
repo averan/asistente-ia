@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arquitectura del asistente FaenaBot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --color-paper: #0c1420; --color-ink: #e6edf6; --color-muted: #a3b1c4;
+      --font-sans: 'Geist', system-ui, sans-serif; --font-serif: 'Instrument Serif', serif; --font-mono: 'Geist Mono', ui-monospace, monospace; }
+    body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink); min-height: 100vh;
+      display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .frame { max-width: 1200px; width: 100%; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400;
+      letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem; }
+    svg { width: 100%; min-width: 960px; display: block; }
+    @media print { .diagram-container { overflow-x: visible; } svg { min-width: 0; } }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Architecture · Vista general</p>
+    <h1>Arquitectura del asistente FaenaBot</h1>
+    <div class="diagram-container">
+<svg class="dd-dark" viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="arquitectura-faenabot-dark-title arquitectura-faenabot-dark-desc">
+  <title id="arquitectura-faenabot-dark-title">Arquitectura del asistente FaenaBot</title>
+  <desc id="arquitectura-faenabot-dark-desc">Los sitios web cargan el widget desde Cloudflare y conversan por el túnel fijo con el servidor del asistente en el Mac, que consulta el modelo de oMLX y guarda las solicitudes; el equipo entra a la gestión con Cloudflare Access por el mismo túnel.</desc>
+  <defs>
+    <marker id="afd-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#a3b1c4"/></marker>
+    <marker id="afd-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#45cfe4"/></marker>
+    <marker id="afd-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#9fb3ff"/></marker>
+  </defs>
+  <rect width="100%" height="100%" fill="#0c1420"/>
+  <g transform="translate(32,0)">
+  <rect x="32" y="144" width="832" height="112" rx="8" fill="rgba(230,237,246,0.02)" stroke="rgba(230,237,246,0.10)" stroke-width="0.8"/>
+  <rect x="56" y="148" width="112" height="12" rx="2" fill="#0c1420"/>
+  <text x="112" y="157" fill="#94a3b8" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.14em">INTERNET · CLOUDFLARE</text>
+  <rect x="32" y="296" width="832" height="208" rx="8" fill="rgba(230,237,246,0.02)" stroke="rgba(230,237,246,0.10)" stroke-width="0.8"/>
+  <rect x="56" y="300" width="124" height="12" rx="2" fill="#0c1420"/>
+  <text x="118" y="309" fill="#94a3b8" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.14em">MAC · SERVICIO LAUNCHD</text>
+  <path d="M180 104 V174" fill="none" stroke="#a3b1c4" stroke-width="1.2" marker-end="url(#afd-arrow)"/>
+  <rect x="188" y="133" width="36" height="12" rx="2" fill="#0c1420"/>
+  <text x="206" y="142" fill="#94a3b8" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">CARGA</text>
+  <path d="M280 104 V116 Q280 124 288 124 H432 Q440 124 440 132 V174" fill="none" stroke="#9fb3ff" stroke-width="1.2" marker-end="url(#afd-arrow-link)"/>
+  <rect x="326" y="104" width="68" height="12" rx="2" fill="#0c1420"/>
+  <text x="360" y="113" fill="#94a3b8" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">CHAT · HTTPS</text>
+  <path d="M744 104 V174" fill="none" stroke="#a3b1c4" stroke-width="1.2" marker-end="url(#afd-arrow)"/>
+  <rect x="752" y="133" width="36" height="12" rx="2" fill="#0c1420"/>
+  <text x="770" y="142" fill="#94a3b8" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">LOGIN</text>
+  <path d="M648 208 H602" fill="none" stroke="#a3b1c4" stroke-width="1.2" marker-end="url(#afd-arrow)"/>
+  <rect x="612" y="188" width="24" height="12" rx="2" fill="#0c1420"/>
+  <text x="624" y="197" fill="#94a3b8" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">JWT</text>
+  <path d="M440 240 V326" fill="none" stroke="#45cfe4" stroke-width="1.4" marker-end="url(#afd-arrow-accent)"/>
+  <rect x="448" y="277" width="28" height="12" rx="2" fill="#0c1420"/>
+  <text x="462" y="286" fill="#94a3b8" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">API.</text>
+  <path d="M560 240 V264 Q560 272 568 272 H696 Q704 272 704 280 V326" fill="none" stroke="#a3b1c4" stroke-width="1.2" marker-end="url(#afd-arrow)"/>
+  <rect x="608" y="252" width="48" height="12" rx="2" fill="#0c1420"/>
+  <text x="632" y="261" fill="#94a3b8" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">GESTION.</text>
+  <path d="M360 360 H286" fill="none" stroke="#a3b1c4" stroke-width="1.2" marker-end="url(#afd-arrow)"/>
+  <rect x="304" y="340" width="40" height="12" rx="2" fill="#0c1420"/>
+  <text x="324" y="349" fill="#94a3b8" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">PROMPT</text>
+  <path d="M560 392 V422" fill="none" stroke="#a3b1c4" stroke-width="1.2" marker-end="url(#afd-arrow)"/>
+  <rect x="568" y="401" width="40" height="12" rx="2" fill="#0c1420"/>
+  <text x="588" y="410" fill="#94a3b8" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">GUARDA</text>
+  <path d="M704 392 V422" fill="none" stroke="#a3b1c4" stroke-width="1.2" marker-end="url(#afd-arrow)"/>
+  <rect x="712" y="401" width="68" height="12" rx="2" fill="#0c1420"/>
+  <text x="746" y="410" fill="#94a3b8" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">LEE · CAMBIA</text>
+  <rect x="120" y="40" width="200" height="64" rx="6" fill="#0c1420"/>
+  <rect x="120" y="40" width="200" height="64" rx="6" fill="rgba(163,177,196,0.10)" stroke="#94a3b8" stroke-width="1"/>
+  <rect x="128" y="46" width="28" height="12" rx="2" fill="none" stroke="#94a3b8" stroke-opacity="0.4" stroke-width="0.8"/>
+  <text x="142" y="55" fill="#94a3b8" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">WEB</text>
+  <text x="220" y="76" fill="#e6edf6" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Sitios web</text>
+  <text x="220" y="92" fill="#a3b1c4" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">5 sitios · embed.js</text>
+  <rect x="640" y="40" width="200" height="64" rx="6" fill="#0c1420"/>
+  <rect x="640" y="40" width="200" height="64" rx="6" fill="rgba(163,177,196,0.10)" stroke="#94a3b8" stroke-width="1"/>
+  <rect x="648" y="46" width="28" height="12" rx="2" fill="none" stroke="#94a3b8" stroke-opacity="0.4" stroke-width="0.8"/>
+  <text x="662" y="55" fill="#94a3b8" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">USER</text>
+  <text x="740" y="76" fill="#e6edf6" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Equipo de gestión</text>
+  <text x="740" y="92" fill="#a3b1c4" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">correo + código</text>
+  <rect x="44" y="176" width="240" height="64" rx="6" fill="#0c1420"/>
+  <rect x="44" y="176" width="240" height="64" rx="6" fill="rgba(230,237,246,0.03)" stroke="rgba(230,237,246,0.30)" stroke-width="1"/>
+  <rect x="52" y="182" width="28" height="12" rx="2" fill="none" stroke="rgba(230,237,246,0.30)" stroke-opacity="0.4" stroke-width="0.8"/>
+  <text x="66" y="191" fill="#94a3b8" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">CDN</text>
+  <text x="164" y="212" fill="#e6edf6" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Widget del asistente</text>
+  <text x="164" y="228" fill="#a3b1c4" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">asistente-ia.faenabot.stream</text>
+  <rect x="360" y="176" width="240" height="64" rx="6" fill="#0c1420"/>
+  <rect x="360" y="176" width="240" height="64" rx="6" fill="rgba(69,207,228,0.10)" stroke="#45cfe4" stroke-width="1"/>
+  <rect x="368" y="182" width="36" height="12" rx="2" fill="none" stroke="#45cfe4" stroke-opacity="0.4" stroke-width="0.8"/>
+  <text x="386" y="191" fill="#94a3b8" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">TUNNEL</text>
+  <text x="480" y="212" fill="#e6edf6" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Túnel fijo</text>
+  <text x="480" y="228" fill="#a3b1c4" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">api. · gestion.faenabot.stream</text>
+  <rect x="648" y="176" width="200" height="64" rx="6" fill="#0c1420"/>
+  <rect x="648" y="176" width="200" height="64" rx="6" fill="rgba(230,237,246,0.03)" stroke="rgba(230,237,246,0.30)" stroke-width="1"/>
+  <rect x="656" y="182" width="28" height="12" rx="2" fill="none" stroke="rgba(230,237,246,0.30)" stroke-opacity="0.4" stroke-width="0.8"/>
+  <text x="670" y="191" fill="#94a3b8" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">AUTH</text>
+  <text x="748" y="212" fill="#e6edf6" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Cloudflare Access</text>
+  <text x="748" y="228" fill="#a3b1c4" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">one-time pin · 24 h</text>
+  <rect x="44" y="328" width="240" height="64" rx="6" fill="#0c1420"/>
+  <rect x="44" y="328" width="240" height="64" rx="6" fill="#121c2b" stroke="#e6edf6" stroke-width="1"/>
+  <rect x="52" y="334" width="28" height="12" rx="2" fill="none" stroke="#e6edf6" stroke-opacity="0.4" stroke-width="0.8"/>
+  <text x="66" y="343" fill="#94a3b8" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">LLM</text>
+  <text x="164" y="364" fill="#e6edf6" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">oMLX</text>
+  <text x="164" y="380" fill="#a3b1c4" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">127.0.0.1:8000 · mlx 4-bit</text>
+  <rect x="360" y="328" width="240" height="64" rx="6" fill="#0c1420"/>
+  <rect x="360" y="328" width="240" height="64" rx="6" fill="rgba(69,207,228,0.10)" stroke="#45cfe4" stroke-width="1"/>
+  <rect x="368" y="334" width="28" height="12" rx="2" fill="none" stroke="#45cfe4" stroke-opacity="0.4" stroke-width="0.8"/>
+  <text x="382" y="343" fill="#94a3b8" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">API</text>
+  <text x="480" y="364" fill="#e6edf6" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Servidor del asistente</text>
+  <text x="480" y="380" fill="#a3b1c4" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">127.0.0.1:5204</text>
+  <rect x="648" y="328" width="200" height="64" rx="6" fill="#0c1420"/>
+  <rect x="648" y="328" width="200" height="64" rx="6" fill="#121c2b" stroke="#e6edf6" stroke-width="1"/>
+  <rect x="656" y="334" width="28" height="12" rx="2" fill="none" stroke="#e6edf6" stroke-opacity="0.4" stroke-width="0.8"/>
+  <text x="670" y="343" fill="#94a3b8" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">WEB</text>
+  <text x="748" y="364" fill="#e6edf6" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Gestión de solicitudes</text>
+  <text x="748" y="380" fill="#a3b1c4" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">127.0.0.1:5205</text>
+  <rect x="528" y="424" width="240" height="64" rx="6" fill="#0c1420"/>
+  <rect x="528" y="424" width="240" height="64" rx="6" fill="rgba(230,237,246,0.05)" stroke="#a3b1c4" stroke-width="1"/>
+  <rect x="536" y="430" width="28" height="12" rx="2" fill="none" stroke="#a3b1c4" stroke-opacity="0.4" stroke-width="0.8"/>
+  <text x="550" y="439" fill="#94a3b8" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">DB</text>
+  <text x="648" y="460" fill="#e6edf6" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Datos</text>
+  <text x="648" y="476" fill="#a3b1c4" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">sqlite · sitios/*.md</text>
+  </g>
+  <line x1="32" y1="528" x2="928" y2="528" stroke="rgba(230,237,246,0.10)" stroke-width="0.8"/>
+  <text x="32" y="552" fill="#a3b1c4" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">LEYENDA</text>
+  <rect x="100" y="544" width="14" height="10" rx="2" fill="rgba(69,207,228,0.10)" stroke="#45cfe4" stroke-width="1"/>
+  <text x="120" y="552" fill="#a3b1c4" font-size="8.5" font-family="'Geist', system-ui, sans-serif">Foco</text>
+  <rect x="204" y="544" width="14" height="10" rx="2" fill="#121c2b" stroke="#e6edf6" stroke-width="1"/>
+  <text x="224" y="552" fill="#a3b1c4" font-size="8.5" font-family="'Geist', system-ui, sans-serif">Servicio</text>
+  <rect x="308" y="544" width="14" height="10" rx="2" fill="rgba(230,237,246,0.05)" stroke="#a3b1c4" stroke-width="1"/>
+  <text x="328" y="552" fill="#a3b1c4" font-size="8.5" font-family="'Geist', system-ui, sans-serif">Datos</text>
+  <rect x="412" y="544" width="14" height="10" rx="2" fill="rgba(230,237,246,0.03)" stroke="rgba(230,237,246,0.30)" stroke-width="1"/>
+  <text x="432" y="552" fill="#a3b1c4" font-size="8.5" font-family="'Geist', system-ui, sans-serif">Cloudflare</text>
+  <rect x="516" y="544" width="14" height="10" rx="2" fill="rgba(163,177,196,0.10)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="536" y="552" fill="#a3b1c4" font-size="8.5" font-family="'Geist', system-ui, sans-serif">Entrada</text>
+  <line x1="620" y1="549" x2="648" y2="549" stroke="#9fb3ff" stroke-width="1.2" marker-end="url(#afd-arrow-link)"/>
+  <text x="656" y="552" fill="#a3b1c4" font-size="8.5" font-family="'Geist', system-ui, sans-serif">HTTPS desde los sitios</text>
+  <line x1="772" y1="549" x2="800" y2="549" stroke="#45cfe4" stroke-width="1.4" marker-end="url(#afd-arrow-accent)"/>
+  <text x="808" y="552" fill="#a3b1c4" font-size="8.5" font-family="'Geist', system-ui, sans-serif">Flujo principal</text>
+</svg>
+    </div>
+  </div>
+</body>
+</html>

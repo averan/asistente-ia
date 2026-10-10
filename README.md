@@ -13,6 +13,7 @@ Gestión: http://localhost:5205 en el Mac · https://gestion.faenabot.stream des
 ```
 
 Documentación de la solución (diagrama, servicios del servidor :5204, pruebas con curl y operación): [docs/arquitectura.html](docs/arquitectura.html).
+Diagrama de vista general (hecho con el plugin diagram-design, perfil «faenabot»): [docs/diagrama-arquitectura.html](docs/diagrama-arquitectura.html) · [versión oscura](docs/diagrama-arquitectura-dark.html).
 Probar los servicios: `./docs/probar-servicios.sh` (en el Mac) o `./docs/probar-servicios.sh --publico` (por api.faenabot.stream); no crea solicitudes reales.
 
 ```
