@@ -76,16 +76,20 @@ Como **servicio del Mac** (recomendado): arranca solo al iniciar sesión, sigue 
 terminal o la app, y se reinicia solo si el servidor o el túnel dejan de responder (lo revisa cada minuto).
 
 ```bash
-./servidor/servicio.sh instalar      # una sola vez
-./servidor/servicio.sh estado        # ¿está corriendo? ¿qué túnel usa?
-./servidor/servicio.sh log           # consultas recibidas y avisos (Ctrl+C para salir del registro)
+cd ~/oMLX_archivos/asistente-ia      # o usar la ruta completa desde cualquier carpeta
+./servidor/servicio.sh instalar      # una sola vez (arranca al iniciar sesión)
+./servidor/servicio.sh detener       # bajar: los sitios muestran «no disponible» (hasta «iniciar» o el próximo inicio de sesión)
+./servidor/servicio.sh iniciar       # subir: responde en ~8 segundos con el túnel fijo
 ./servidor/servicio.sh reiniciar     # vuelve a conectar el servidor y el túnel
-./servidor/servicio.sh detener       # lo pausa (los sitios muestran «no disponible») hasta «iniciar» o el próximo inicio de sesión
-./servidor/servicio.sh iniciar       # lo vuelve a encender
-./servidor/servicio.sh desinstalar   # lo detiene y deja de arrancar al iniciar sesión
+./servidor/servicio.sh estado        # ¿está corriendo? ¿qué túnel usa?
+./servidor/servicio.sh log           # registro en vivo (Ctrl+C solo cierra la vista)
+./servidor/servicio.sh desinstalar   # bajarlo y que deje de arrancar al iniciar sesión
 ```
 
-O a mano, en una terminal: `./servidor/publicar.sh` (Ctrl+C para desconectarlo).
+O a mano, en una terminal: primero `servicio.sh detener` (usan el mismo puerto) y luego `./servidor/publicar.sh`
+(Ctrl+C para desconectarlo). Con el servicio abajo tampoco funciona la gestión, y estos comandos no inician ni detienen
+oMLX. Registro: `~/Library/Logs/asistente-ia.log` (también en la app Consola); los inicios de sesión en la gestión se
+ven en Cloudflare, en Zero Trust → Logs → Access.
 
 En ambos casos arranca el servidor y el túnel. Con el **túnel fijo** (`TUNEL_CONFIG` en `servidor/.env`, ver
 `.env.example`) la dirección es siempre `https://api.faenabot.stream`, y `publico/backend.js` solo se vuelve a subir
@@ -97,6 +101,40 @@ aviso «no disponible» (con su nombre y colores, que `backend.js` guarda). Requ
 autorizados en Cloudflare Access, con un código que llega al correo) — tickets y contactos de todos los sitios,
 filtros por sitio, modo y estado, detalle con la conversación, visor de archivos, cambio de estado y notas. También:
 `python3 servidor/solicitudes.py listar` y `python3 servidor/solicitudes.py ver TCK-0017`.
+
+## Direcciones y túnel de Cloudflare
+
+| Dirección | Qué es | Acceso |
+|---|---|---|
+| `faenabot.stream` | Página de FaenaBot con demo (Workers) | Pública |
+| `asistente-ia.faenabot.stream` | Widget: `embed.js`, `asistente.js`, `backend.js` (Workers) | Pública |
+| `api.faenabot.stream` | Servidor del asistente, :5204 en el Mac (túnel fijo) | Solo sitios autorizados (CORS) |
+| `gestion.faenabot.stream` | Gestión, :5205 en el Mac (túnel fijo) | Cloudflare Access: correo + código |
+| `wodobox-web.faenabot.stream`, `local-ia.faenabot.stream` | Páginas de Wodobox e IA Local (Workers) | Públicas |
+
+El túnel con nombre `faenabot` une el Mac con Cloudflare sin abrir puertos. Su configuración está fuera del repo, en
+`~/.cloudflared/` (`cert.pem` y `<id>.json` son secretos):
+
+```yaml
+# ~/.cloudflared/faenabot.yml
+tunnel: <id-del-túnel>
+credentials-file: /Users/<usuario>/.cloudflared/<id-del-túnel>.json
+ingress:
+  - hostname: api.faenabot.stream
+    service: http://127.0.0.1:5204
+  - hostname: gestion.faenabot.stream
+    service: http://127.0.0.1:5205
+  - service: http_status:404
+```
+
+Se creó con `cloudflared tunnel login`, `cloudflared tunnel create faenabot` y `cloudflared tunnel route dns faenabot
+<dirección>` para cada dirección (crea los CNAME). Para agregar otra: `route dns`, su regla en `faenabot.yml` antes del
+404 y `servicio.sh reiniciar`. En `servidor/.env`: `TUNEL_CONFIG`, `TUNEL_URL`, `GESTION_HOST`, `ACCESS_TEAM`, `ACCESS_AUD`.
+
+**Cloudflare Access** (Zero Trust, plan Free): equipo `faenabot`; inicio de sesión con One-time PIN (Integrations →
+Identity providers); aplicación «Gestión asistente» en `gestion.faenabot.stream` (solo One-time PIN, autenticación
+instantánea, sesión de 24 h); política «Equipo» (Allow, Include → Emails). Para agregar o quitar personas: Access
+controls → Policies → Equipo → Configure. Para cortar una sesión abierta: My Team → Users → Revoke session.
 
 ## Seguridad
 

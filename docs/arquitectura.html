@@ -216,7 +216,7 @@
         <div class="tech">
           <div><b>Cloudflare Workers</b><span class="ver">static assets</span><span class="role">sirve el widget; se despliega solo con cada push a GitHub</span></div>
           <div><b>Wrangler</b><span class="ver">4.149</span><span class="role">configuración del Worker y sus dominios (<code>wrangler.jsonc</code>)</span></div>
-          <div><b>Cloudflare DNS y Registrar</b><span class="role">dominio <code>faenabot.stream</code> y sus subdominios con HTTPS</span></div>
+          <div><b>Cloudflare DNS y Registrar</b><span class="role">dominio <code>faenabot.stream</code>: subdominios de Workers (sitios y widget) y registros CNAME del túnel (<code>api.</code> y <code>gestion.</code>), todos con HTTPS</span></div>
           <div><b>GitHub</b><span class="role">código y <code>backend.js</code> con la dirección vigente del túnel</span></div>
           <div><b>Vercel · Cloudflare Workers · GitHub Pages</b><span class="role">donde están publicados los sitios que integran el asistente</span></div>
         </div>
@@ -225,7 +225,7 @@
         <h3>Conexión<span class="where">internet → Mac</span></h3>
         <div class="tech">
           <div><b>cloudflared</b><span class="ver">2026.9.3</span><span class="role">túnel fijo con nombre (<code>faenabot</code>): <code>api.faenabot.stream</code> → :5204 y <code>gestion.faenabot.stream</code> → :5205. El HTTPS lo pone Cloudflare y el Mac no abre puertos</span></div>
-          <div><b>Cloudflare Access</b><span class="ver">Zero Trust Free</span><span class="role">inicio de sesión con código por correo para la gestión; solo los correos autorizados</span></div>
+          <div><b>Cloudflare Access</b><span class="ver">Zero Trust Free</span><span class="role">equipo <code>faenabot</code>: inicio de sesión con código por correo (One-time PIN) para la gestión; solo los correos de la política «Equipo»</span></div>
         </div>
       </div>
       <div class="layer">
@@ -351,6 +351,99 @@
     </div>
   </section>
 
+  <section aria-labelledby="h-direcciones">
+    <h2 id="h-direcciones">Direcciones publicadas</h2>
+    <p class="sub">Todo vive bajo el dominio <code>faenabot.stream</code>, registrado y administrado en Cloudflare.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Dirección</th><th>Qué es</th><th>Dónde corre</th><th>Acceso</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">faenabot.stream</td><td>Página de FaenaBot con demo del asistente</td><td>Cloudflare Workers</td><td>Pública</td></tr>
+          <tr><td class="mono">asistente-ia.faenabot.stream</td><td>Widget: <code>embed.js</code>, <code>asistente.js</code>, <code>backend.js</code></td><td>Cloudflare Workers</td><td>Pública</td></tr>
+          <tr><td class="mono">api.faenabot.stream</td><td>Servidor del asistente (:5204)</td><td>Mac, por el túnel fijo</td><td>Solo sitios autorizados (CORS)</td></tr>
+          <tr><td class="mono">gestion.faenabot.stream</td><td>Gestión de solicitudes (:5205)</td><td>Mac, por el túnel fijo</td><td>Cloudflare Access: correo + código</td></tr>
+          <tr><td class="mono">wodobox-web.faenabot.stream</td><td>Página de Wodobox (mesa de ayuda)</td><td>Cloudflare Workers</td><td>Pública</td></tr>
+          <tr><td class="mono">local-ia.faenabot.stream</td><td>Página de IA Local</td><td>Cloudflare Workers</td><td>Pública</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>api.faenabot.stream</h3>
+        <ul>
+          <li>Recibe las conversaciones y solicitudes de todos los widgets: <code>/api/config</code>, <code>/v1/chat/completions</code>, <code>/api/solicitudes</code>, <code>/health</code>, <code>/v1/models/status</code>.</li>
+          <li>Solo responde a los sitios con archivo en <code>sitios/</code>.</li>
+          <li>Con el Mac apagado, Cloudflare responde 530 y el widget muestra «no disponible».</li>
+          <li>Prueba completa: <code>./docs/probar-servicios.sh --publico</code>.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>gestion.faenabot.stream</h3>
+        <ul>
+          <li>Cloudflare pide el correo y envía un código (One-time PIN); solo entran los correos de la política <strong>Equipo</strong>. La sesión dura 24 horas.</li>
+          <li>El servidor verifica además la firma del acceso en cada petición y firma cada cambio con el correo de quien lo hace.</li>
+          <li><strong>Agregar o quitar personas:</strong> Zero Trust → Access controls → Policies → Equipo → Configure → Include → Emails.</li>
+          <li><strong>Cortar una sesión ya abierta:</strong> Zero Trust → My Team → Users → Revoke session.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-tunel">
+    <h2 id="h-tunel">Túnel de Cloudflare</h2>
+    <p class="sub">Un túnel con nombre (<code>faenabot</code>) une el Mac con Cloudflare sin abrir puertos: <code>cloudflared</code> abre conexiones de salida y Cloudflare entrega cada dirección al puerto que corresponde. La dirección no cambia ni expira.</p>
+    <pre># ~/.cloudflared/faenabot.yml  (fuera del repositorio)
+tunnel: &lt;id-del-túnel&gt;
+credentials-file: /Users/&lt;usuario&gt;/.cloudflared/&lt;id-del-túnel&gt;.json
+no-autoupdate: true
+ingress:
+  - hostname: api.faenabot.stream
+    service: http://127.0.0.1:5204
+  - hostname: gestion.faenabot.stream
+    service: http://127.0.0.1:5205
+  - service: http_status:404          # cualquier otra dirección</pre>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Pieza</th><th>Dónde</th><th>Para qué</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">cert.pem</td><td class="mono">~/.cloudflared/</td><td>Autorización de la cuenta para crear túneles y registros DNS. Secreto.</td></tr>
+          <tr><td class="mono">&lt;id&gt;.json</td><td class="mono">~/.cloudflared/</td><td>Credenciales del túnel. Secreto: quien lo tenga puede conectarse como el túnel.</td></tr>
+          <tr><td class="mono">faenabot.yml</td><td class="mono">~/.cloudflared/</td><td>Reglas: qué dirección va a qué puerto.</td></tr>
+          <tr><td>DNS (CNAME)</td><td>Cloudflare</td><td><code>api</code> y <code>gestion</code> apuntan al túnel (<code>&lt;id&gt;.cfargotunnel.com</code>).</td></tr>
+          <tr><td class="mono">servidor/.env</td><td>Mac (fuera de git)</td><td><code>TUNEL_CONFIG</code>, <code>TUNEL_URL</code>, <code>GESTION_HOST</code>, <code>ACCESS_TEAM</code>, <code>ACCESS_AUD</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Cómo se creó</h3>
+        <pre>cloudflared tunnel login
+cloudflared tunnel create faenabot
+cloudflared tunnel route dns faenabot api.faenabot.stream
+cloudflared tunnel route dns faenabot gestion.faenabot.stream
+cloudflared tunnel --config ~/.cloudflared/faenabot.yml ingress validate</pre>
+      </div>
+      <div class="panel">
+        <h3>Agregar otra dirección</h3>
+        <ul>
+          <li><code>cloudflared tunnel route dns faenabot nueva.faenabot.stream</code></li>
+          <li>Agregar su regla en <code>faenabot.yml</code>, antes de la línea del 404.</li>
+          <li><code>./servidor/servicio.sh reiniciar</code></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Cloudflare Access</h3>
+        <ul>
+          <li>Equipo <code>faenabot</code> (<code>faenabot.cloudflareaccess.com</code>), plan Free.</li>
+          <li>Inicio de sesión: One-time PIN (Integrations → Identity providers).</li>
+          <li>Aplicación «Gestión asistente» en <code>gestion.faenabot.stream</code>: solo One-time PIN, autenticación instantánea, sesión de 24 h.</li>
+          <li>Política «Equipo»: Allow, Include → Emails.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">Respaldo: si se quita <code>TUNEL_CONFIG</code> de <code>.env</code>, <code>publicar.sh</code> vuelve al túnel gratuito (trycloudflare), con una dirección nueva en cada arranque que publica en <code>backend.js</code>. La gestión desde internet solo funciona con el túnel fijo.</p>
+  </section>
+
   <section aria-labelledby="h-integrar">
     <h2 id="h-integrar">Integrar un sitio nuevo</h2>
     <ol class="flow">
@@ -432,15 +525,55 @@ curl -s $BASE/api/solicitudes -H "Origin: $ORIGEN" -H "Content-Type: application
 
   <section aria-labelledby="h-operacion">
     <h2 id="h-operacion">Operación en el Mac</h2>
-    <p class="sub"><code>publicar.sh</code> corre como servicio del Mac: arranca al iniciar sesión y conecta el túnel fijo. Cada minuto revisa el servidor y el túnel; si algo deja de responder 3 veces seguidas, el servicio lo vuelve a conectar. Como la dirección no cambia, no publica nada nuevo al arrancar o detenerse: si el Mac no está disponible, cada sitio muestra su aviso «no disponible».</p>
+    <p class="sub"><code>publicar.sh</code> corre como servicio del Mac (launchd): arranca al iniciar sesión y conecta el túnel fijo. Cada minuto revisa el servidor y el túnel; si algo deja de responder 3 veces seguidas, el servicio lo vuelve a conectar. Como la dirección no cambia, no publica nada nuevo al subir o bajar: si el Mac no está disponible, cada sitio muestra su aviso «no disponible».</p>
+    <p class="sub">Los comandos se ejecutan desde la carpeta del proyecto (o con la ruta completa, desde cualquier carpeta):</p>
+    <pre>cd ~/oMLX_archivos/asistente-ia
+
+./servidor/servicio.sh detener      # bajar: los sitios muestran «no disponible»
+./servidor/servicio.sh iniciar      # subir: responde en ~8 segundos
+./servidor/servicio.sh reiniciar    # reconectar el servidor y el túnel
+./servidor/servicio.sh estado       # ¿está corriendo? ¿qué túnel usa?
+./servidor/servicio.sh log          # registro en vivo (Ctrl+C solo cierra la vista)
+./servidor/servicio.sh desinstalar  # bajarlo y quitarlo del inicio de sesión
+./servidor/servicio.sh instalar     # volver a instalarlo (arranca al iniciar sesión)</pre>
     <div class="cmds">
-      <div class="cmd"><code>servicio.sh estado</code><span>Si está corriendo y qué túnel usa</span></div>
-      <div class="cmd"><code>servicio.sh log</code><span>Conversaciones y solicitudes en vivo</span></div>
-      <div class="cmd"><code>servicio.sh detener</code><span>Lo pausa; los sitios muestran «no disponible»</span></div>
-      <div class="cmd"><code>servicio.sh iniciar</code><span>Lo vuelve a encender (responde en segundos)</span></div>
-      <div class="cmd"><code>servicio.sh reiniciar</code><span>Vuelve a conectar el servidor y el túnel</span></div>
-      <div class="cmd"><code>servicio.sh desinstalar</code><span>Lo quita del inicio de sesión</span></div>
+      <div class="cmd"><code>servicio.sh detener</code><span>Bajar el asistente. Dura hasta <code>iniciar</code> o el próximo inicio de sesión</span></div>
+      <div class="cmd"><code>servicio.sh iniciar</code><span>Subirlo de nuevo (~8 s con el túnel fijo)</span></div>
+      <div class="cmd"><code>servicio.sh reiniciar</code><span>Volver a conectar el servidor y el túnel si algo no responde</span></div>
+      <div class="cmd"><code>servicio.sh estado</code><span>Si está corriendo (<code>running</code>), su proceso y el túnel en uso</span></div>
+      <div class="cmd"><code>servicio.sh log</code><span>Conversaciones, solicitudes y cambios de la gestión, en vivo</span></div>
+      <div class="cmd"><code>servicio.sh desinstalar</code><span>Bajarlo para siempre: deja de arrancar al iniciar sesión</span></div>
+      <div class="cmd"><code>servicio.sh instalar</code><span>Instalarlo como servicio (una vez, o tras desinstalar)</span></div>
     </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>La gestión depende del servicio</h3>
+        <p>Con el servicio abajo tampoco funcionan <code>gestion.faenabot.stream</code> ni <code>localhost:5205</code>.</p>
+      </div>
+      <div class="panel">
+        <h3>oMLX va aparte</h3>
+        <p>Estos comandos no inician ni detienen oMLX. Si oMLX está apagado, el servicio reintenta cada 30 segundos hasta encontrarlo.</p>
+      </div>
+      <div class="panel">
+        <h3>A mano, en una terminal</h3>
+        <p>Primero <code>servicio.sh detener</code> (usan el mismo puerto), luego <code>./servidor/publicar.sh</code>; Ctrl+C lo baja.</p>
+      </div>
+    </div>
+    <h3>Registro del servidor</h3>
+    <p class="sub">El servicio escribe en <code>~/Library/Logs/asistente-ia.log</code>: se ve con <code>servicio.sh log</code>, con la app Consola (Aplicaciones → Utilidades) o abriendo el archivo.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Línea</th><th>Significa</th></tr></thead>
+        <tbody>
+          <tr><td class="code">chat  &lt;IP&gt;  200  1.1s</td><td>Un mensaje de una conversación, con su resultado y su duración.</td></tr>
+          <tr><td class="code">SOLICITUD TCK-0035 …</td><td>Una solicitud registrada (contacto o ticket), con su sitio.</td></tr>
+          <tr><td class="code">SOLICITUD RECHAZADA … 400</td><td>Un envío rechazado y el motivo.</td></tr>
+          <tr><td class="code">GESTIÓN TCK-0035  correo</td><td>Un cambio hecho en la gestión desde internet, con el correo de quien lo hizo.</td></tr>
+          <tr><td class="code">! El túnel no responde (1/3)</td><td>Una revisión fallida. Si la siguiente funciona, no pasa nada; a las 3 seguidas se reconecta.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub">Los inicios de sesión en la gestión (permitidos y rechazados) quedan en Cloudflare: <strong>Zero Trust → Logs → Access</strong>. Los rechazados nunca llegan al Mac, así que no aparecen en este registro.</p>
   </section>
 
   <footer>Código: repositorio <span class="mono">averan/asistente-ia</span> · el widget se publica en Cloudflare Workers; el servidor, la base de datos y la configuración de cada sitio quedan solo en el Mac.</footer>
